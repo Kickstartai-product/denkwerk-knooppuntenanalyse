@@ -2,13 +2,12 @@ import React from 'react';
 
 // Define the category color mapping, matching the second legend's visual style.
 export const categoryColors: Record<string, string> = {
-  'Sociaal & Maatschappelijk': 'rgb(158, 109, 135)',
-  'Economisch': 'rgb(165, 137, 67)',
-  'Ecologisch': 'rgb(105, 145, 94)',
-  'Geopolitiek & militair': 'rgb(72, 92, 114)',
-  'Technologisch & digitaal': 'rgb(99, 113, 163)',
-  'Gezondheid': 'rgb(72, 143, 177)',
-  'unknown': 'rgb(133, 133, 133)',
+  'Sociaal & Maatschappelijk': '#0699a9',
+  'Economisch': '#702f8e',
+  'Ecologisch': '#84b440',
+  'Geopolitiek & militair': '#a8aaad',
+  'Technologisch & digitaal': '#abccd5',
+  'Gezondheid': '#e42259'
 };
 
 // Define colors for other visual elements.
@@ -52,9 +51,9 @@ const ColorLegend: React.FC<ColorLegendProps> = ({ className = '', title }) => {
       {/* Spacer */}
       <hr className="my-3 border-gray-200/80" />
 
-      {/* Verworvenheid (Node Size) Section */}
+      {/* verwevenheid (Node Size) Section */}
       <div className="text-center">
-        <h4 className="text-xs font-bold text-gray-700 mb-1.5">Verworvenheid</h4>
+        <h4 className="text-xs font-bold text-gray-700 mb-1.5">verwevenheid</h4>
         <div className="flex items-center justify-center gap-2.5">
           <span className="text-xs text-gray-600">Laag</span>
           <div className="flex items-center gap-1.5">

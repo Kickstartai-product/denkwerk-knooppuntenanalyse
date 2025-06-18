@@ -1,15 +1,17 @@
-import { useState, useMemo, useRef, useEffect, useCallback } from 'react';
-import { GraphCanvas, GraphCanvasRef, lightTheme } from 'reagraph';
+// src/components/RelationGraphCanvas.tsx
+
+import { useState, useMemo, useCallback } from 'react';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { shortNodeDescriptions } from '../shortNodeDescriptions';
+} from '@/components/ui/select'; // Assuming shadcn/ui select
+import { shortNodeDescriptions } from '../shortNodeDescriptions'; // Your data helper
+import { GraphCanvas } from './GraphCanvas'; // <-- Our new SVG component
 
-// --- (Interfaces and other helper code remain unchanged) ---
+// --- Interfaces ---
 export interface Node {
   id: string;
   label: string;
@@ -18,15 +20,10 @@ export interface Node {
   nr_docs: number;
   nr_citations: number;
   data?: {
-    eigen_centrality?: number;
-    eigen_centrality_in?: number;
-    eigen_centrality_out?: number;
-    eigen_centrality_cross_category?: number;
-    eigen_centrality_in_cross_category?: number;
-    eigen_centrality_out_cross_category?: number;
     [key: string]: any;
   };
   category: string;
+  fill?: string; // This property is added in useMemo for our SVG component
   [key: string]: any;
 }
 
@@ -41,6 +38,7 @@ export interface Edge {
   [key:string]: any;
 }
 
+// --- Constants & Helper Functions ---
 export const categoryColors: Record<string, string> = {
   'Sociaal & Maatschappelijk': '#0699a9',
   'Economisch': '#702f8e',
@@ -49,29 +47,6 @@ export const categoryColors: Record<string, string> = {
   'Technologisch & digitaal': '#abccd5',
   'Gezondheid': '#e42259'
 };
-
-const theme = {
-  ...lightTheme,
-  node: {
-    ...lightTheme.node,
-    activeFill: '#FF8C42',
-    label: { ...lightTheme.node.label, activeColor: '#FF8C42' },
-  },
-  edge: {
-    ...lightTheme.edge,
-    activeStroke: '#FF8C42',
-    activeFill: '#FF8C42',
-    opacity: 0.5,
-  },
-  arrow: { ...lightTheme.arrow, activeFill: '#FF8C42' },
-  ring: { ...lightTheme.ring, activeFill: '#FF8C42' },
-  cluster: null as any,
-};
-
-interface RelationGraphCanvasProps {
-  nodes: Node[];
-  edges: Edge[];
-}
 
 const formatDocumentLink = (link: string): string => {
   if (link && link.startsWith('/')) {
@@ -96,6 +71,8 @@ const renderCitationParts = (citationText: string) => {
   );
 };
 
+
+// --- Helper Component: CitationPopup ---
 const CitationPopup = ({ edge, onClose }: { edge: Edge; onClose: () => void; }) => {
     if (!edge) return null;
 
@@ -143,29 +120,23 @@ const CitationPopup = ({ edge, onClose }: { edge: Edge; onClose: () => void; }) 
         </div>
       </div>
     );
-  };
+};
+
+
+// --- Main Component ---
+interface RelationGraphCanvasProps {
+  nodes: Node[];
+  edges: Edge[];
+}
 
 export const RelationGraphCanvas = ({ nodes, edges }: RelationGraphCanvasProps) => {
   const [selectedThreat, setSelectedThreat] = useState<string>('polarisatie rond complottheorieën');
   const [selectedEdge, setSelectedEdge] = useState<Edge | null>(null);
-  // <-- REMOVED: No longer need hasMounted state -->
-  // const [hasMounted, setHasMounted] = useState(false);
-  const graphRef = useRef<GraphCanvasRef | null>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  const [isGraphLoading, setIsGraphLoading] = useState(false);
-  const [refreshKey, setRefreshKey] = useState(0);
 
   const safeNodes = nodes || [];
   const safeEdges = edges || [];
 
-  // <-- REMOVED: useEffect for setting hasMounted is no longer needed -->
-  // useEffect(() => {
-  //   setHasMounted(true);
-  // }, []);
-  
-  // --- (useMemo hooks for data filtering remain unchanged) ---
-    const nodesWithOutgoingConnections = useMemo(() => {
+  const nodesWithOutgoingConnections = useMemo(() => {
     if (safeNodes.length === 0) return [];
     const nodesWithOutgoing = new Set<string>();
     safeEdges.forEach(edge => {
@@ -173,10 +144,12 @@ export const RelationGraphCanvas = ({ nodes, edges }: RelationGraphCanvasProps) 
     });
     return safeNodes.filter(node => nodesWithOutgoing.has(node.id));
   }, [safeNodes, safeEdges]);
+
   const selectedThreatDisplayLabel = useMemo(() => {
     if (!selectedThreat) return null;
     return shortNodeDescriptions[selectedThreat] || selectedThreat;
   }, [selectedThreat]);
+
   const { filteredNodes, filteredEdges } = useMemo(() => {
     if (safeNodes.length === 0) {
       return { filteredNodes: [], filteredEdges: [] };
@@ -221,7 +194,7 @@ export const RelationGraphCanvas = ({ nodes, edges }: RelationGraphCanvasProps) 
       const category = node.category || 'unknown';
       const color = categoryColors[category] || '#A9A9A9';
       const label = shortNodeDescriptions[node.id] || node.label || node.id;
-      return { ...node, fill: color, color: color, label: label};
+      return { ...node, fill: color, label: label };
     });
 
     const processedEdges = relevantEdges.map(edge => {
@@ -233,40 +206,12 @@ export const RelationGraphCanvas = ({ nodes, edges }: RelationGraphCanvasProps) 
     return { filteredNodes: processedNodes, filteredEdges: processedEdges };
   }, [selectedThreat, safeNodes, safeEdges]);
 
-  // <-- MODIFIED: Simplified useEffect for loading and fitting -->
-  useEffect(() => {
-    if (filteredNodes.length === 0) {
-      setIsGraphLoading(false);
-      return;
-    }
-
-    // Set loading to true as soon as we know we have nodes to render
-    setIsGraphLoading(true);
-
-    const timer = setTimeout(() => {
-      try {
-        if (graphRef.current) {
-          graphRef.current.fitNodesInView();
-        }
-      } catch (error) {
-        console.warn('Failed to fit nodes in view:', error);
-      } finally {
-        setIsGraphLoading(false);
-      }
-    }, 500);
-
-    return () => clearTimeout(timer);
-  }, [selectedThreat, refreshKey, filteredNodes.length]); // Depends on the key drivers for a re-render
-
+  // Note: The onEdgeClick callback is kept for the CitationPopup,
+  // but it is not yet wired into the SVG graph itself.
   const handleEdgeClick = useCallback((edge: Edge) => {
     setSelectedEdge(current => (current && current.id === edge.id ? null : edge));
   }, []);
-  
-  const handleRefresh = () => {
-    setRefreshKey(prevKey => prevKey + 1);
-  };
-  
-  // <-- MODIFIED: Initial placeholder check is simplified -->
+
   if (nodes.length === 0) {
     return (
       <div className="w-full space-y-4">
@@ -284,7 +229,6 @@ export const RelationGraphCanvas = ({ nodes, edges }: RelationGraphCanvasProps) 
 
   return (
     <div className="w-full space-y-4">
-      {/* --- (Select dropdown remains unchanged) --- */}
       <div className="flex items-center justify-center">
         <div className="w-80">
           <Select value={selectedThreat} onValueChange={setSelectedThreat}>
@@ -318,41 +262,12 @@ export const RelationGraphCanvas = ({ nodes, edges }: RelationGraphCanvasProps) 
       </div>
 
       <div className="w-full bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
-        <div ref={containerRef} style={{ width: '100%', height: '600px', position: 'relative' }}>
-          {/* --- (The rest of the JSX is the same as the previous correct answer) --- */}
+        <div style={{ width: '100%', height: '600px', position: 'relative' }}>
           {filteredNodes.length > 0 ? (
-            <>
-              <GraphCanvas
-                ref={graphRef}
-                nodes={filteredNodes}
-                edges={filteredEdges}
-                theme={theme}
-                cameraMode="rotate"
-                layoutType="hierarchicalLr"
-                onEdgeClick={handleEdgeClick as any}
-              />
-              
-              {isGraphLoading && (
-                <div className="absolute inset-0 bg-white/80 backdrop-blur-sm flex flex-col items-center justify-center z-10 transition-opacity">
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
-                  <p className="mt-4 text-gray-700 font-medium">Visualisatie opbouwen...</p>
-                </div>
-              )}
-
-              <button
-                onClick={handleRefresh}
-                className="absolute top-3 right-3 z-20 bg-white p-2 rounded-full shadow-lg hover:bg-gray-100 active:scale-95 transition-all"
-                title="Herlaad visualisatie"
-                aria-label="Herlaad visualisatie"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/>
-                  <path d="M21 3v5h-5"/>
-                  <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/>
-                  <path d="M3 21v-5h5"/>
-                </svg>
-              </button>
-            </>
+            <GraphCanvas
+              nodes={filteredNodes}
+              edges={filteredEdges}
+            />
           ) : (
              <div className="flex items-center justify-center h-full">
                 <div className="text-gray-500">Geen data om te visualiseren voor deze selectie.</div>

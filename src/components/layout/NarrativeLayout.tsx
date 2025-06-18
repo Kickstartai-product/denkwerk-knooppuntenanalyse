@@ -371,7 +371,7 @@ De dreigingen in de visualisatie zijn verdeeld over zes categorieën (zoals econ
                             </p>
                         </div>
                     </Card>
-                    <p className="text-base md:text-lg text-gray-700 leading-relaxed text-left">De visualisatie is interactief: <strong style={{ color: 'rgb(0, 153, 168)' }}>klik op een verbinding om de onderliggende citaten en brondocumenten te raadplegen.</strong> Voor een diepgaande blik en uitleg verwijzen we u naar ons <a href='https://google.com' target='_blank' rel='noopener noreferrer' style={{ color: 'rgb(0, 153, 168)', fontWeight: 'bold' }} className='underline'>rapport</a> en de bijbehorende <a href='https://google.com' target='_blank' rel='noopener noreferrer' style={{ color: 'rgb(0, 153, 168)', fontWeight: 'bold' }} className='underline'>appendix</a>.</p>
+                    <p className="text-base md:text-lg text-gray-700 leading-relaxed text-left">De visualisatie is interactief: <strong style={{ color: 'rgb(0, 153, 168)' }}>klik op een verbinding om de onderliggende citaten en brondocumenten te raadplegen.</strong> Voor een diepgaande blik en uitleg verwijzen we u naar ons <a href='https://denkwerk.online/media/1155/weerbaarheid-by-design.pdf' target='_blank' rel='noopener noreferrer' style={{ color: 'rgb(0, 153, 168)', fontWeight: 'bold' }} className='underline'>rapport</a> en de bijbehorende <a href='https://denkwerk.online/media/1156/weerbaarheid-by-design-appendix.pdf' target='_blank' rel='noopener noreferrer' style={{ color: 'rgb(0, 153, 168)', fontWeight: 'bold' }} className='underline'>appendix</a>.</p>
 
                 {/* Footnote */}
                 <div className="mt-8 pt-6 border-t border-gray-300">
