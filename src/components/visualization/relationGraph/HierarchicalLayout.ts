@@ -1,5 +1,3 @@
-// src/utils/HierarchicalLayout.ts
-
 import type { Node, Edge } from './RelationGraphCanvas';
 
 export interface LayoutNode {
@@ -108,7 +106,7 @@ export class HierarchicalLayout {
     }
 
     /**
-     * Position nodes vertically within a column
+     * Position nodes vertically within a column, centering the group.
      */
     private positionNodesInColumn(
         columnNodes: Node[], 
@@ -116,9 +114,6 @@ export class HierarchicalLayout {
         positionMap: Map<string, LayoutNode>
     ): void {
         if (columnNodes.length === 0) return;
-
-        const availableHeight = this.config.height - (2 * this.config.nodeRadius) - 100; // Leave margins
-        const startY = this.config.nodeRadius + 50;
 
         if (columnNodes.length === 1) {
             // Single node - center it vertically
@@ -130,11 +125,21 @@ export class HierarchicalLayout {
                 node: columnNodes[0]
             });
         } else {
-            // Multiple nodes - distribute evenly
+            // Multiple nodes - distribute from the middle out
+            const numNodes = columnNodes.length;
+            const availableHeight = this.config.height - (2 * this.config.nodeRadius) - 100; // Leave margins
+
+            // Calculate spacing, ensuring nodes fit within the available height
             const spacing = Math.min(
                 this.config.verticalSpacing,
-                availableHeight / (columnNodes.length - 1)
+                availableHeight / (numNodes - 1)
             );
+
+            // Calculate the total height this column of nodes will occupy
+            const totalColumnHeight = (numNodes - 1) * spacing;
+            
+            // Calculate the starting Y position to center the entire column vertically
+            const startY = (this.config.height / 2) - (totalColumnHeight / 2);
 
             columnNodes.forEach((node, index) => {
                 const y = startY + (index * spacing);

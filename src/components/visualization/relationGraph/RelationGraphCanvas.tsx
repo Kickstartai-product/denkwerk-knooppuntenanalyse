@@ -1,18 +1,17 @@
 // src/components/RelationGraphCanvas.tsx
 
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { shortNodeDescriptions } from '../shortNodeDescriptions';
+} from '@/components/ui/select'; // Assuming shadcn/ui select
+import { shortNodeDescriptions } from '../shortNodeDescriptions'; // Your data helper
 import { GraphCanvas } from './GraphCanvas';
-import ColorLegend from './ColorLegend'; // Import the legend component
 
-// --- Interfaces (unchanged) ---
+// --- TYPE DEFINITIONS ---
 export interface Node {
   id: string;
   label: string;
@@ -39,7 +38,7 @@ export interface Edge {
   [key:string]: any;
 }
 
-// --- Constants & Helper Functions ---
+// --- CONSTANTS & HELPERS ---
 export const categoryColors: Record<string, string> = {
   'Sociaal & Maatschappelijk': '#0699a9',
   'Economisch': '#702f8e',
@@ -51,7 +50,6 @@ export const categoryColors: Record<string, string> = {
 
 const EDGE_HOVER_COLOR = '#FF8C42';
 
-// Create a static list of all categories for the legend
 const allCategoriesForLegend = Object.entries(categoryColors).map(
   ([name, color]) => ({ name, color })
 );
@@ -79,19 +77,18 @@ const renderCitationParts = (citationText: string) => {
   );
 };
 
+// --- HELPER COMPONENTS ---
 
-// --- Helper Component: CitationPopup (unchanged) ---
 const CitationPopup = ({ edge, onClose }: { edge: Edge; onClose: () => void; }) => {
     if (!edge) return null;
 
     return (
-      <div className="absolute inset-0 flex items-center justify-center p-4 bg-gray-500 bg-opacity-20" onClick={onClose}>
+      <div className="absolute inset-0 flex items-center justify-center p-4 bg-gray-500 bg-opacity-20 z-20" onClick={onClose}>
         <div className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-2xl max-h-[540px] flex flex-col" onClick={e => e.stopPropagation()}>
           <div className="flex justify-between items-center mb-4 flex-shrink-0">
             <h2 className="text-xl font-semibold text-gray-800">Representatieve citaten</h2>
             <button onClick={onClose} className="text-2xl font-light text-gray-500 hover:text-gray-900 leading-none">&times;</button>
           </div>
-
           <div className="flex-1 overflow-y-auto pr-2 -mr-2 space-y-4">
             {edge.citaat_relaties && edge.citaat_relaties.length > 0 ? (
               edge.citaat_relaties.map((citation, index) => (
@@ -130,8 +127,27 @@ const CitationPopup = ({ edge, onClose }: { edge: Edge; onClose: () => void; }) 
     );
 };
 
+const ColorLegend = ({ categories }: { categories: { name: string; color: string; }[] }) => {
+  return (
+    <div className="bg-white/80 backdrop-blur-sm p-3 rounded-lg shadow-lg border border-gray-200/50">
+      <div className="space-y-1.5">
+        {categories.map(({ name, color }) => (
+          <div key={name} className="flex items-center gap-2">
+            <div
+              className="w-3 h-3 rounded-full flex-shrink-0"
+              style={{ backgroundColor: color }}
+            />
+            <span className="text-xs leading-tight text-gray-700">{name}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
 
-// --- Main Component ---
+
+// --- MAIN COMPONENT ---
+
 interface RelationGraphCanvasProps {
   nodes: Node[];
   edges: Edge[];
@@ -139,38 +155,36 @@ interface RelationGraphCanvasProps {
 
 export const RelationGraphCanvas = ({ nodes, edges }: RelationGraphCanvasProps) => {
   const [selectedThreat, setSelectedThreat] = useState<string>('polarisatie rond complottheorieën');
+  const [displayedThreat, setDisplayedThreat] = useState<string>(selectedThreat);
+  const [isGraphVisible, setIsGraphVisible] = useState<boolean>(true);
   const [selectedEdge, setSelectedEdge] = useState<Edge | null>(null);
 
   const safeNodes = nodes || [];
   const safeEdges = edges || [];
 
-  const nodesWithOutgoingConnections = useMemo(() => {
-    if (safeNodes.length === 0) return [];
-    const nodesWithOutgoing = new Set<string>();
-    safeEdges.forEach(edge => {
-      nodesWithOutgoing.add(edge.source);
-    });
-    return safeNodes.filter(node => nodesWithOutgoing.has(node.id));
-  }, [safeNodes, safeEdges]);
-
-  const selectedThreatDisplayLabel = useMemo(() => {
-    if (!selectedThreat) return null;
-    return shortNodeDescriptions[selectedThreat] || selectedThreat;
-  }, [selectedThreat]);
+  useEffect(() => {
+    if (selectedThreat !== displayedThreat) {
+      setIsGraphVisible(false);
+      const timer = setTimeout(() => {
+        setDisplayedThreat(selectedThreat);
+        setIsGraphVisible(true);
+      }, 300); // Duration matches CSS transition
+      return () => clearTimeout(timer);
+    }
+  }, [selectedThreat, displayedThreat]);
 
   const { filteredNodes, filteredEdges } = useMemo(() => {
-    // ... filtering logic remains the same ...
     if (safeNodes.length === 0) {
       return { filteredNodes: [], filteredEdges: [] };
     }
     let relevantNodes: Node[];
     let relevantEdges: Edge[];
-    if (selectedThreat) {
-      const firstOrderConnections = safeEdges.filter(edge => edge.source === selectedThreat).sort((a, b) => (b.weight || 0) - (a.weight || 0)).slice(0, 6);
+    if (displayedThreat) {
+      const firstOrderConnections = safeEdges.filter(edge => edge.source === displayedThreat).sort((a, b) => (b.weight || 0) - (a.weight || 0)).slice(0, 6);
       const firstOrderTargets = new Set(firstOrderConnections.map(edge => edge.target));
-      const secondOrderConnections = safeEdges.filter(edge => firstOrderTargets.has(edge.source) && edge.target !== selectedThreat && !firstOrderTargets.has(edge.target)).sort((a, b) => (b.weight || 0) - (a.weight || 0)).slice(0, 6);
+      const secondOrderConnections = safeEdges.filter(edge => firstOrderTargets.has(edge.source) && edge.target !== displayedThreat && !firstOrderTargets.has(edge.target)).sort((a, b) => (b.weight || 0) - (a.weight || 0)).slice(0, 6);
       const secondOrderTargets = new Set(secondOrderConnections.map(edge => edge.target));
-      const relevantNodeIds = new Set([selectedThreat, ...firstOrderTargets, ...secondOrderTargets]);
+      const relevantNodeIds = new Set([displayedThreat, ...firstOrderTargets, ...secondOrderTargets]);
       relevantNodes = safeNodes.filter(node => relevantNodeIds.has(node.id));
       relevantEdges = [...firstOrderConnections, ...secondOrderConnections];
     } else {
@@ -189,19 +203,41 @@ export const RelationGraphCanvas = ({ nodes, edges }: RelationGraphCanvasProps) 
       return { ...edge, size };
     });
     return { filteredNodes: processedNodes, filteredEdges: processedEdges };
-  }, [selectedThreat, safeNodes, safeEdges]);
+  }, [displayedThreat, safeNodes, safeEdges]);
+
+  const nodesWithOutgoingConnections = useMemo(() => {
+    if (safeNodes.length === 0) return [];
+    const nodesWithOutgoing = new Set<string>();
+    safeEdges.forEach(edge => nodesWithOutgoing.add(edge.source));
+    return safeNodes.filter(node => nodesWithOutgoing.has(node.id));
+  }, [safeNodes, safeEdges]);
+
+  const selectedThreatDisplayLabel = useMemo(() => {
+    if (!selectedThreat) return null;
+    return shortNodeDescriptions[selectedThreat] || selectedThreat;
+  }, [selectedThreat]);
 
   const handleEdgeClick = useCallback((edge: Edge) => {
     setSelectedEdge(current => (current && current.id === edge.id ? null : edge));
   }, []);
 
   if (nodes.length === 0) {
-    // ... loading state remains the same ...
+    return (
+      <div className="w-full space-y-4">
+        <div className="flex items-center justify-center">
+          <div className="w-80 h-10 bg-gray-200 rounded animate-pulse"></div>
+        </div>
+        <div className="w-full bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden" style={{ height: '600px' }}>
+          <div className="flex items-center justify-center h-full">
+            <div className="text-gray-500">Wachten op netwerkdata...</div>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
     <div className="w-full space-y-4">
-      {/* The selector is now restored */}
       <div className="flex items-center justify-center">
         <div className="w-80">
           <Select value={selectedThreat} onValueChange={setSelectedThreat}>
@@ -235,7 +271,10 @@ export const RelationGraphCanvas = ({ nodes, edges }: RelationGraphCanvasProps) 
       </div>
 
       <div className="w-full bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
-        <div style={{ width: '100%', height: '600px', position: 'relative' }}>
+        <div
+          className={`transition-opacity duration-300 ease-in-out ${isGraphVisible ? 'opacity-100' : 'opacity-0'}`}
+          style={{ width: '100%', height: '600px', position: 'relative' }}
+        >
           {filteredNodes.length > 0 ? (
             <GraphCanvas
               nodes={filteredNodes}
@@ -249,7 +288,6 @@ export const RelationGraphCanvas = ({ nodes, edges }: RelationGraphCanvasProps) 
             </div>
           )}
 
-          {/* Position the static legend in the bottom-left corner */}
           <div className="absolute bottom-4 left-4 z-10">
               <ColorLegend categories={allCategoriesForLegend} />
           </div>
