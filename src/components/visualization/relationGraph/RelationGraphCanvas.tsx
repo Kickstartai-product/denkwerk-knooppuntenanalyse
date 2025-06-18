@@ -9,7 +9,7 @@ import {
 } from '@/components/ui/select';
 import { shortNodeDescriptions } from '../shortNodeDescriptions';
 
-// --- (Interfaces: Node, Edge, categoryColors, theme, etc. remain unchanged) ---
+// --- (Interfaces and other helper code remain unchanged) ---
 export interface Node {
   id: string;
   label: string;
@@ -145,27 +145,27 @@ const CitationPopup = ({ edge, onClose }: { edge: Edge; onClose: () => void; }) 
     );
   };
 
-// --- START: MODIFIED COMPONENT ---
 export const RelationGraphCanvas = ({ nodes, edges }: RelationGraphCanvasProps) => {
   const [selectedThreat, setSelectedThreat] = useState<string>('polarisatie rond complottheorieën');
   const [selectedEdge, setSelectedEdge] = useState<Edge | null>(null);
-  const [hasMounted, setHasMounted] = useState(false);
+  // <-- REMOVED: No longer need hasMounted state -->
+  // const [hasMounted, setHasMounted] = useState(false);
   const graphRef = useRef<GraphCanvasRef | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // <-- NEW: State for loading indicator and manual refresh -->
   const [isGraphLoading, setIsGraphLoading] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
 
   const safeNodes = nodes || [];
   const safeEdges = edges || [];
 
-  useEffect(() => {
-    setHasMounted(true);
-  }, []);
-
+  // <-- REMOVED: useEffect for setting hasMounted is no longer needed -->
+  // useEffect(() => {
+  //   setHasMounted(true);
+  // }, []);
+  
   // --- (useMemo hooks for data filtering remain unchanged) ---
-  const nodesWithOutgoingConnections = useMemo(() => {
+    const nodesWithOutgoingConnections = useMemo(() => {
     if (safeNodes.length === 0) return [];
     const nodesWithOutgoing = new Set<string>();
     safeEdges.forEach(edge => {
@@ -233,13 +233,14 @@ export const RelationGraphCanvas = ({ nodes, edges }: RelationGraphCanvasProps) 
     return { filteredNodes: processedNodes, filteredEdges: processedEdges };
   }, [selectedThreat, safeNodes, safeEdges]);
 
-  // <-- MODIFIED: This effect now controls the loading state -->
+  // <-- MODIFIED: Simplified useEffect for loading and fitting -->
   useEffect(() => {
-    if (!hasMounted || filteredNodes.length === 0) {
+    if (filteredNodes.length === 0) {
       setIsGraphLoading(false);
       return;
     }
 
+    // Set loading to true as soon as we know we have nodes to render
     setIsGraphLoading(true);
 
     const timer = setTimeout(() => {
@@ -252,34 +253,29 @@ export const RelationGraphCanvas = ({ nodes, edges }: RelationGraphCanvasProps) 
       } finally {
         setIsGraphLoading(false);
       }
-    }, 500); // Using the more stable 500ms timeout
+    }, 500);
 
     return () => clearTimeout(timer);
-  }, [hasMounted, selectedThreat, refreshKey, filteredNodes.length]); // Dependencies trigger on change or refresh
+  }, [selectedThreat, refreshKey, filteredNodes.length]); // Depends on the key drivers for a re-render
 
   const handleEdgeClick = useCallback((edge: Edge) => {
     setSelectedEdge(current => (current && current.id === edge.id ? null : edge));
   }, []);
   
-  // <-- NEW: Handler for the manual refresh button -->
   const handleRefresh = () => {
     setRefreshKey(prevKey => prevKey + 1);
   };
-
-  // --- (Initial loading placeholder remains unchanged) ---
-  if (!hasMounted || nodes.length === 0) {
+  
+  // <-- MODIFIED: Initial placeholder check is simplified -->
+  if (nodes.length === 0) {
     return (
       <div className="w-full space-y-4">
         <div className="flex items-center justify-center">
-          <div className="w-80">
-            <div className="h-10 bg-gray-200 rounded animate-pulse"></div>
-          </div>
+          <div className="w-80 h-10 bg-gray-200 rounded animate-pulse"></div>
         </div>
-        <div className="w-full bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
-          <div style={{ width: '100%', height: '600px', position: 'relative' }}>
-            <div className="flex items-center justify-center h-full">
-              <div className="text-gray-500">Laden van netwerkvisualisatie...</div>
-            </div>
+        <div className="w-full bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden" style={{ height: '600px' }}>
+          <div className="flex items-center justify-center h-full">
+            <div className="text-gray-500">Wachten op netwerkdata...</div>
           </div>
         </div>
       </div>
@@ -320,14 +316,14 @@ export const RelationGraphCanvas = ({ nodes, edges }: RelationGraphCanvasProps) 
           </Select>
         </div>
       </div>
-      
-      {/* <-- MODIFIED: Graph container now includes loading overlay and refresh button --> */}
+
       <div className="w-full bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
         <div ref={containerRef} style={{ width: '100%', height: '600px', position: 'relative' }}>
+          {/* --- (The rest of the JSX is the same as the previous correct answer) --- */}
           {filteredNodes.length > 0 ? (
             <>
               <GraphCanvas
-                key={`${selectedThreat}-${refreshKey}`} // <-- MODIFIED: Key now includes refresh trigger
+                key={`${selectedThreat}-${refreshKey}`}
                 ref={graphRef}
                 nodes={filteredNodes}
                 edges={filteredEdges}
@@ -337,7 +333,6 @@ export const RelationGraphCanvas = ({ nodes, edges }: RelationGraphCanvasProps) 
                 onEdgeClick={handleEdgeClick as any}
               />
               
-              {/* <-- NEW: Loading Indicator Overlay --> */}
               {isGraphLoading && (
                 <div className="absolute inset-0 bg-white/80 backdrop-blur-sm flex flex-col items-center justify-center z-10 transition-opacity">
                   <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
@@ -345,7 +340,6 @@ export const RelationGraphCanvas = ({ nodes, edges }: RelationGraphCanvasProps) 
                 </div>
               )}
 
-              {/* <-- NEW: Manual Refresh Button --> */}
               <button
                 onClick={handleRefresh}
                 className="absolute top-3 right-3 z-20 bg-white p-2 rounded-full shadow-lg hover:bg-gray-100 active:scale-95 transition-all"
