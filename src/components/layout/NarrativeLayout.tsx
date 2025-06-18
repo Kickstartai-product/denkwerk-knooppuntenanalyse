@@ -379,7 +379,7 @@ De dreigingen in de visualisatie zijn verdeeld over zes categorieën (zoals econ
                         </div>
                         <div className="px-4 sm:px-6 pb-4 border-t border-gray-200/40">
                             <p className="text-sm text-gray-600 leading-relaxed pt-4 text-center font-medium">
-                                Ontdek keteneffecten van verschillende dreigingen in het netwerk. <strong>Klik op een verbinding</strong> om de onderliggende citaten en brondocumenten te bekijken.
+                                Ontdek keteneffecten van verschillende dreigingen in het netwerk. <strong>Klik op een verbinding</strong> om de onderliggende citaten en brondocumenten te bekijken. Alleen de meest impactvolle verbindingen worden getoond.
                             </p>
                         </div>
                     </Card>
