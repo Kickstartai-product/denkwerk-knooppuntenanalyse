@@ -55,13 +55,13 @@ const ColorLegend: React.FC<ColorLegendProps> = ({ className = '', title }) => {
       <div className="text-center">
         <h4 className="text-xs font-bold text-gray-700 mb-1.5">verwevenheid</h4>
         <div className="flex items-center justify-center gap-2.5">
-          <span className="text-xs text-gray-600">Laag</span>
+          <span className="text-xs text-gray-600">Beperkt</span>
           <div className="flex items-center gap-1.5">
             <div className="w-2 h-2 rounded-full" style={{ backgroundColor: nodeColor }}></div>
             <div className="w-3 h-3 rounded-full" style={{ backgroundColor: nodeColor }}></div>
             <div className="w-4 h-4 rounded-full" style={{ backgroundColor: nodeColor }}></div>
           </div>
-          <span className="text-xs text-gray-600">Hoog</span>
+          <span className="text-xs text-gray-600">Groot</span>
         </div>
       </div>
 
