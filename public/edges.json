@@ -634,16 +634,16 @@
         "description": "No description"
       },
       {
-        "source": "Ministerie van Justitie en Veiligheid",
-        "filename": 2969,
-        "title": "Weerbaarheidsopgave",
-        "publication_date": "2024-12-06 00:00:00",
-        "document_type": "Rapport (onderdeel)",
-        "document_link": "https://open.overheid.nl/repository/dpc-07b2f5157fa66d5539dbf7f03b8faa29d5c6a883/1/pdf/tk-bijlage-2-weerbaarheidsopgave.pdf",
-        "citaat": "Door pogingen om onze democratie, rechtsstaat en overheid te ontregelen, neemt het risico op extremisme, radicalisering en polarisatie toe.",
-        "oorzaak": "hybride operaties – aangrijpen op maatschappelijk debat door statelijke actoren",
+        "source": "clingendael",
+        "filename": 299,
+        "title": "(Ongewenste) buitenlandse inmenging",
+        "publication_date": "2024-09-01 00:00:00",
+        "document_type": "Reports and papers",
+        "document_link": "https://www.clingendael.org/sites/default/files/2024-09/Clingendael_Rapport_Ongewenste_Buitenlandse_Inmenging.pdf",
+        "citaat": " Desinformatie betreft het doelbewust verspreiden van inaccurate of misleidende informatie om geld te verdienen, een persoon, sociale groep, organisatie of land te schaden, of voor eigen politiek gewin. Deze misleidende informatie kan (grote) spanningen veroorzaken in de samenleving.",
+        "oorzaak": "desinformatie",
         "gevolg": "polarisatie rond complottheorieën",
-        "description": "Het rapport gaat over het versterken van weerbaarheid in het licht van militaire en\n                        hybride dreigingen voor Nederland (weerbaarheidsopgave). De weerbaarheidsopgave bestaat\n                        uit 2 sporen: maatschappelijke weerbaarheid en militaire paraatheid."
+        "description": ""
       }
     ]
   },
@@ -887,15 +887,15 @@
       },
       {
         "source": "Ministerie van Buitenlandse Zaken",
-        "filename": 10516,
-        "title": "Verslag geannoteerde agenda voor de NAVO ministeriële bijeenkomst van de ministers\n                           van Buitenlandse Zaken en de ministers van Defensie van 1 juni 2021",
-        "publication_date": "2021-05-20 00:00:00",
-        "document_type": "Vergaderstuk",
-        "document_link": "https://open.overheid.nl/repository/ronl-9d259f4d-2e0d-4a23-b5a0-92facc9a32fb/1/pdf/verslag-geannoteerde-agenda-voor-de-navo-ministeriele-bijeenkomst-van-de-ministers-van-buitenlandse-zaken-en-de-ministers-van-defensie-van-1-juni.pdf",
-        "citaat": "Daarnaast moet aandacht zijn voor de nieuwe en de hernieuwde uitdagingen waarvoor de NAVO staat zoals het agressieve handelen van Rusland, de toenemende assertiviteit van China en de impact van het gebruik van nieuwe technologieën.",
-        "oorzaak": "gebruik van nieuwe technologieën",
-        "gevolg": "uitdagingen voor navo",
-        "description": "No description"
+        "filename": 16785,
+        "title": "Verslag NAVO ministeriële bijeenkomst 30 november - 1 december 2021",
+        "publication_date": "2021-12-13 00:00:00",
+        "document_type": "Kamerstuk",
+        "document_link": "https://open.overheid.nl/repository/ronl-cc3b4fd4-c93e-4deb-aa85-2f68266a8aa8/1/pdf/verslag-fmm-30-november-en-1-december-2021.pdf",
+        "citaat": "Ook in deze sessie kwam het toenemend agressieve gedrag van Rusland aan de orde, waaronder het hybride handelen van Rusland (zoals het verspreiden van desinformatie, pogingen de Oekraïense politiek te beïnvloeden en tactieken om de EU en de NAVO te verdelen) en de zorgelijke opbouw van troepen in de buurt van Oekraïne.",
+        "oorzaak": "(heimelijke) beïnvloeding door china/rusland",
+        "gevolg": "uiteenvallen van de navo",
+        "description": "Minister Knapen (BZ) doet verslag van de NAVO ministeriële bijeenkomst van 30 november\n                        en 1 december 2021."
       }
     ]
   },
