@@ -5,7 +5,7 @@ import compression from 'vite-plugin-compression';
 
 // https://vite.dev/config/
 export default defineConfig({
-  base: process.env.NODE_ENV === 'production' ? '/denkwerk-knooppuntenanalyse' : '/',
+  base: process.env.NODE_ENV === 'production' ? '/denkwerk-knooppuntenanalyse/' : '/',
   plugins: [react(),     
   compression({
     algorithm: 'gzip',  // or 'brotliCompress', 'deflate', etc.
