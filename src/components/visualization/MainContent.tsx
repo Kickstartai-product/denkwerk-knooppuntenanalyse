@@ -41,7 +41,14 @@ const getCentralityValue = (node: Node, metric: CentralityMetric): number | null
   return node.data?.[metric] ?? null;
 };
 
-// Helper function to determine the centrality tier
+/**
+ * Helper function to determine the centrality tier.
+ * - If value < 0.001: "Zeer laag"
+ * - < 70th quantile: "Laag"
+ * - < 80th quantile: "Gemiddeld"
+ * - < 90th quantile: "Hoog"
+ * - >= 90th quantile: "Zeer hoog"
+ */
 const getCentralityTier = (node: Node | null, allNodes: Node[]): string => {
   const metric: CentralityMetric = 'cross_category_eigen_centrality_out';
   if (!node) return "N.v.t.";
@@ -56,14 +63,28 @@ const getCentralityTier = (node: Node | null, allNodes: Node[]): string => {
 
   if (allValues.length === 0) return "N.v.t.";
 
-  const rank = allValues.indexOf(currentValue);
-  const percentile = (rank / (allValues.length -1)) * 100;
+  if (currentValue < 0.001) return "Zeer laag";
 
-  if (percentile >= 80) return "Zeer hoog";
-  if (percentile >= 60) return "Hoog";
-  if (percentile >= 40) return "Gemiddeld";
-  if (percentile >= 20) return "Laag";
-  return "Zeer laag";
+  // Helper to get quantile value
+  const quantile = (arr: number[], q: number) => {
+    const pos = (arr.length - 1) * q;
+    const base = Math.floor(pos);
+    const rest = pos - base;
+    if (arr[base + 1] !== undefined) {
+      return arr[base] + rest * (arr[base + 1] - arr[base]);
+    } else {
+      return arr[base];
+    }
+  };
+
+  const q70 = quantile(allValues, 0.7);
+  const q80 = quantile(allValues, 0.8);
+  const q90 = quantile(allValues, 0.9);
+
+  if (currentValue < q70) return "Laag";
+  if (currentValue < q80) return "Gemiddeld";
+  if (currentValue < q90) return "Hoog";
+  return "Zeer hoog";
 };
 
 const getImpactLevel = (node: Node | null): string => {
