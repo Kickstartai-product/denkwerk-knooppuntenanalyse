@@ -25,7 +25,7 @@ const ScreenAlert = () => {
               Schermgrootte melding
             </AlertTitle>
             <AlertDescription className="text-xs text-gray-600">
-              Deze website komt het beste tot zijn recht op een groter scherm (laptop, tablet of desktop).
+            Deze website komt het beste tot zijn recht op een groter scherm (laptop, tablet in landschapsmodus of desktop).
             </AlertDescription>
           </div>
           <button 
