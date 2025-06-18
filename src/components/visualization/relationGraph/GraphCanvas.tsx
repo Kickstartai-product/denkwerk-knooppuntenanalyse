@@ -16,7 +16,7 @@ export interface Edge {
     source: string;
     target: string;
     size?: number;
-    [key: string]: any;
+    [key:string]: any;
 }
 
 // --- Prop Types (unchanged) ---
@@ -36,7 +36,8 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
 }) => {
     const VIEWBOX_WIDTH = 800;
     const VIEWBOX_HEIGHT = 600;
-    const NODE_RADIUS = 25;
+    const NODE_RADIUS = 20;
+    const ARROWHEAD_SIZE = 19; // Using a fixed pixel size for arrowheads
 
     const nodeMap = useMemo(() => {
         if (nodes.length === 0) return new Map();
@@ -63,10 +64,16 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
             if (!source || !target) return null;
 
             const angle = Math.atan2(target.y - source.y, target.x - source.x);
-            const x1 = source.x + NODE_RADIUS * Math.cos(angle);
-            const y1 = source.y + NODE_RADIUS * Math.sin(angle);
-            const x2 = target.x - NODE_RADIUS * Math.cos(angle);
-            const y2 = target.y - NODE_RADIUS * Math.sin(angle);
+            
+            // Adjust endpoints to account for node radius and arrowhead size
+            const arrowheadOffset = ARROWHEAD_SIZE / 2; // Half the marker size
+            const sourceRadius = NODE_RADIUS;
+            const targetRadius = NODE_RADIUS + arrowheadOffset;
+
+            const x1 = source.x + sourceRadius * Math.cos(angle);
+            const y1 = source.y + sourceRadius * Math.sin(angle);
+            const x2 = target.x - targetRadius * Math.cos(angle);
+            const y2 = target.y - targetRadius * Math.sin(angle);
 
             const sourceColor = source.node.fill || '#ccc';
             const targetColor = target.node.fill || '#ccc';
@@ -131,10 +138,11 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
                         key={color}
                         id={`arrowhead-${color.replace('#', '')}`}
                         viewBox="0 0 10 10"
-                        refX="10" // Position the marker at the tip of the line
+                        refX="5" // Use center of marker as reference point
                         refY="5"
-                        markerWidth="6"
-                        markerHeight="6"
+                        markerUnits="userSpaceOnUse" // Use pixels for size
+                        markerWidth={ARROWHEAD_SIZE} // Smaller arrowhead
+                        markerHeight={ARROWHEAD_SIZE} // Smaller arrowhead
                         orient="auto-start-reverse"
                     >
                         <path d="M 0 0 L 10 5 L 0 10 z" fill={color} />
@@ -142,7 +150,8 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
                 ))}
             </defs>
 
-            <g>
+            {/* Edges group with transparency */}
+            <g opacity={0.5}>
                 {edgeCalculations.map(calc => {
                     if (!calc) return null;
                     return (
@@ -154,14 +163,14 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
                             y2={calc.y2}
                             sourceColor={calc.sourceColor}
                             targetColor={calc.targetColor}
-                            strokeWidth={calc.edge.size || 2}
+                            strokeWidth={5}
                             gradientId={calc.gradientId}
                         />
                     );
                 })}
             </g>
 
-            {/* Nodes group (unchanged) */}
+            {/* Nodes group */}
             <g>
                 {Array.from(nodeMap.values()).map(({ x, y, node }) => (
                     <g key={node.id} transform={`translate(${x}, ${y})`}>
@@ -171,8 +180,11 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
                             textAnchor="middle"
                             dominantBaseline="hanging"
                             fill="#333"
-                            fontSize="9px"
+                            fontSize="10px"
                             fontWeight="500"
+                            stroke="white"
+                            strokeWidth="0.4em"
+                            paintOrder="stroke"
                             style={{ pointerEvents: 'none' }}
                         >
                             {node.label}
