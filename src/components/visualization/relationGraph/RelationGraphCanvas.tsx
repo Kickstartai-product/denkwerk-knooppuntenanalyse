@@ -323,7 +323,6 @@ export const RelationGraphCanvas = ({ nodes, edges }: RelationGraphCanvasProps) 
           {filteredNodes.length > 0 ? (
             <>
               <GraphCanvas
-                key={`${selectedThreat}-${refreshKey}`}
                 ref={graphRef}
                 nodes={filteredNodes}
                 edges={filteredEdges}
