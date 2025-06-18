@@ -1,6 +1,6 @@
 // src/utils/HierarchicalLayout.ts
 
-import { Node, Edge } from './GraphCanvas';
+import type { Node, Edge } from './RelationGraphCanvas';
 
 export interface LayoutNode {
     id: string;

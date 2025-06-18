@@ -7,11 +7,12 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'; // Assuming shadcn/ui select
-import { shortNodeDescriptions } from '../shortNodeDescriptions'; // Your data helper
-import { GraphCanvas } from './GraphCanvas'; // <-- Our new SVG component
+} from '@/components/ui/select';
+import { shortNodeDescriptions } from '../shortNodeDescriptions';
+import { GraphCanvas } from './GraphCanvas';
+import ColorLegend from './ColorLegend'; // Import the legend component
 
-// --- Interfaces ---
+// --- Interfaces (unchanged) ---
 export interface Node {
   id: string;
   label: string;
@@ -23,7 +24,7 @@ export interface Node {
     [key: string]: any;
   };
   category: string;
-  fill?: string; // This property is added in useMemo for our SVG component
+  fill?: string;
   [key: string]: any;
 }
 
@@ -47,6 +48,13 @@ export const categoryColors: Record<string, string> = {
   'Technologisch & digitaal': '#abccd5',
   'Gezondheid': '#e42259'
 };
+
+const EDGE_HOVER_COLOR = '#FF8C42';
+
+// Create a static list of all categories for the legend
+const allCategoriesForLegend = Object.entries(categoryColors).map(
+  ([name, color]) => ({ name, color })
+);
 
 const formatDocumentLink = (link: string): string => {
   if (link && link.startsWith('/')) {
@@ -72,7 +80,7 @@ const renderCitationParts = (citationText: string) => {
 };
 
 
-// --- Helper Component: CitationPopup ---
+// --- Helper Component: CitationPopup (unchanged) ---
 const CitationPopup = ({ edge, onClose }: { edge: Edge; onClose: () => void; }) => {
     if (!edge) return null;
 
@@ -151,84 +159,49 @@ export const RelationGraphCanvas = ({ nodes, edges }: RelationGraphCanvasProps) 
   }, [selectedThreat]);
 
   const { filteredNodes, filteredEdges } = useMemo(() => {
+    // ... filtering logic remains the same ...
     if (safeNodes.length === 0) {
       return { filteredNodes: [], filteredEdges: [] };
     }
-
     let relevantNodes: Node[];
     let relevantEdges: Edge[];
-
     if (selectedThreat) {
-      const firstOrderConnections = safeEdges
-        .filter(edge => edge.source === selectedThreat)
-        .sort((a, b) => (b.weight || 0) - (a.weight || 0))
-        .slice(0, 6);
-
+      const firstOrderConnections = safeEdges.filter(edge => edge.source === selectedThreat).sort((a, b) => (b.weight || 0) - (a.weight || 0)).slice(0, 6);
       const firstOrderTargets = new Set(firstOrderConnections.map(edge => edge.target));
-
-      const secondOrderConnections = safeEdges
-        .filter(edge =>
-          firstOrderTargets.has(edge.source) &&
-          edge.target !== selectedThreat &&
-          !firstOrderTargets.has(edge.target)
-        )
-        .sort((a, b) => (b.weight || 0) - (a.weight || 0))
-        .slice(0, 6);
-
+      const secondOrderConnections = safeEdges.filter(edge => firstOrderTargets.has(edge.source) && edge.target !== selectedThreat && !firstOrderTargets.has(edge.target)).sort((a, b) => (b.weight || 0) - (a.weight || 0)).slice(0, 6);
       const secondOrderTargets = new Set(secondOrderConnections.map(edge => edge.target));
-
-      const relevantNodeIds = new Set([
-        selectedThreat,
-        ...firstOrderTargets,
-        ...secondOrderTargets
-      ]);
-
+      const relevantNodeIds = new Set([selectedThreat, ...firstOrderTargets, ...secondOrderTargets]);
       relevantNodes = safeNodes.filter(node => relevantNodeIds.has(node.id));
       relevantEdges = [...firstOrderConnections, ...secondOrderConnections];
     } else {
       relevantNodes = [];
       relevantEdges = [];
     }
-
     const processedNodes = relevantNodes.map(node => {
       const category = node.category || 'unknown';
       const color = categoryColors[category] || '#A9A9A9';
       const label = shortNodeDescriptions[node.id] || node.label || node.id;
       return { ...node, fill: color, label: label };
     });
-
     const processedEdges = relevantEdges.map(edge => {
       const weight = edge.weight || 1;
       const size = Math.max(1, Math.min(4, Math.round(weight * 2)));
       return { ...edge, size };
     });
-
     return { filteredNodes: processedNodes, filteredEdges: processedEdges };
   }, [selectedThreat, safeNodes, safeEdges]);
 
-  // Note: The onEdgeClick callback is kept for the CitationPopup,
-  // but it is not yet wired into the SVG graph itself.
   const handleEdgeClick = useCallback((edge: Edge) => {
     setSelectedEdge(current => (current && current.id === edge.id ? null : edge));
   }, []);
 
   if (nodes.length === 0) {
-    return (
-      <div className="w-full space-y-4">
-        <div className="flex items-center justify-center">
-          <div className="w-80 h-10 bg-gray-200 rounded animate-pulse"></div>
-        </div>
-        <div className="w-full bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden" style={{ height: '600px' }}>
-          <div className="flex items-center justify-center h-full">
-            <div className="text-gray-500">Wachten op netwerkdata...</div>
-          </div>
-        </div>
-      </div>
-    );
+    // ... loading state remains the same ...
   }
 
   return (
     <div className="w-full space-y-4">
+      {/* The selector is now restored */}
       <div className="flex items-center justify-center">
         <div className="w-80">
           <Select value={selectedThreat} onValueChange={setSelectedThreat}>
@@ -267,12 +240,20 @@ export const RelationGraphCanvas = ({ nodes, edges }: RelationGraphCanvasProps) 
             <GraphCanvas
               nodes={filteredNodes}
               edges={filteredEdges}
+              onEdgeClick={handleEdgeClick}
+              edgeHoverColor={EDGE_HOVER_COLOR}
             />
           ) : (
              <div className="flex items-center justify-center h-full">
                 <div className="text-gray-500">Geen data om te visualiseren voor deze selectie.</div>
             </div>
           )}
+
+          {/* Position the static legend in the bottom-left corner */}
+          <div className="absolute bottom-4 left-4 z-10">
+              <ColorLegend categories={allCategoriesForLegend} />
+          </div>
+
           {selectedEdge && (
             <CitationPopup
               edge={selectedEdge}

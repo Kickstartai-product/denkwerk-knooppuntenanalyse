@@ -7,10 +7,13 @@ interface EdgeLineProps {
     y1: number;
     x2: number;
     y2: number;
-    sourceColor: string;
-    targetColor: string;
+    stroke: string;
     strokeWidth: number;
-    gradientId: string;
+    opacity: number;
+    markerId: string;
+    onMouseEnter: () => void;
+    onMouseLeave: () => void;
+    onClick: () => void;
 }
 
 export const EdgeLine: React.FC<EdgeLineProps> = ({
@@ -18,24 +21,48 @@ export const EdgeLine: React.FC<EdgeLineProps> = ({
     y1,
     x2,
     y2,
-    sourceColor,
-    targetColor,
+    stroke,
     strokeWidth,
-    gradientId,
+    opacity,
+    markerId,
+    onMouseEnter,
+    onMouseLeave,
+    onClick,
 }) => {
-    // We still need to create the marker ID to point to the correct arrowhead
-    const markerId = `arrowhead-${targetColor.replace('#', '')}`;
+    // Create a hitbox that is 10px wider than the visible line
+    const hitboxStrokeWidth = strokeWidth + 10;
 
     return (
-        <line
-            x1={x1}
-            y1={y1}
-            x2={x2}
-            y2={y2}
-            stroke={`url(#${gradientId})`} // Use the gradient for the stroke
-            strokeWidth={strokeWidth}
-            markerEnd={`url(#${markerId})`} // Apply the arrowhead
-        />
+        // Use a group to apply the pointer cursor and hold both lines
+        <g style={{ cursor: 'pointer' }} onClick={onClick} onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
+            {/* 1. The invisible hitbox line (rendered first, so it's "underneath") */}
+            {/* This line is wider and captures all mouse events. */}
+            <line
+                x1={x1}
+                y1={y1}
+                x2={x2}
+                y2={y2}
+                stroke="transparent"
+                strokeWidth={hitboxStrokeWidth}
+            />
+            
+            {/* 2. The visible line (rendered second, on top of the hitbox) */}
+            {/* This line has pointer-events disabled so it doesn't interfere with the hitbox. */}
+            <line
+                x1={x1}
+                y1={y1}
+                x2={x2}
+                y2={y2}
+                stroke={stroke}
+                strokeWidth={strokeWidth}
+                markerEnd={`url(#${markerId})`}
+                opacity={opacity}
+                style={{ 
+                    transition: 'opacity 0.2s ease, stroke 0.2s ease',
+                    pointerEvents: 'none', 
+                }}
+            />
+        </g>
     );
 };
 
