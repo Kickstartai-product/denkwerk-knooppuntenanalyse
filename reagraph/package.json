@@ -1,0 +1,137 @@
+{
+  "name": "reagraph",
+  "version": "4.22.0",
+  "description": "WebGL Node-based Graph for React",
+  "scripts": {
+    "build": "vite build --mode library",
+    "test": "vitest --passWithNoTests",
+    "test:coverage": "vitest run --coverage --passWithNoTests",
+    "prettier": "prettier --loglevel warn --write 'src/**/*.{ts,tsx,js,jsx}'",
+    "lint": "eslint --ext js,ts,tsx src",
+    "lint:fix": "eslint --ext js,ts,tsx --fix src",
+    "start": "storybook dev -p 9009",
+    "build-storybook": "storybook build",
+    "prepare": "husky install",
+    "chromatic": "npx chromatic --project-token=a7098a56897c --auto-accept-changes"
+  },
+  "type": "module",
+  "types": "dist/index.d.ts",
+  "main": "./dist/index.umd.cjs",
+  "module": "./dist/index.js",
+  "source": "src/index.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.umd.cjs",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "browser": "dist/index.js",
+  "typings": "dist/index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/reaviz/reagraph.git"
+  },
+  "files": [
+    "dist"
+  ],
+  "keywords": [
+    "react",
+    "reactjs",
+    "network-graph",
+    "dag",
+    "directed-graph",
+    "graph",
+    "threejs",
+    "webgl"
+  ],
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/reaviz/reagraph/issues"
+  },
+  "homepage": "https://github.com/reaviz/reagraph#readme",
+  "dependencies": {
+    "@react-spring/three": "9.6.1",
+    "@react-three/fiber": "8.13.5",
+    "@use-gesture/react": "^10.3.1",
+    "camera-controls": "^2.8.3",
+    "classnames": "^2.5.1",
+    "d3-array": "^3.2.4",
+    "d3-force-3d": "^3.0.3",
+    "d3-hierarchy": "^3.1.2",
+    "d3-scale": "^4.0.2",
+    "ellipsize": "^0.5.1",
+    "glodrei": "^0.0.1",
+    "graphology": "^0.25.4",
+    "graphology-layout": "^0.6.1",
+    "graphology-layout-forceatlas2": "^0.10.1",
+    "graphology-layout-noverlap": "^0.4.2",
+    "graphology-metrics": "^2.1.0",
+    "graphology-shortest-path": "^2.0.2",
+    "hold-event": "^0.2.0",
+    "three": "^0.154.0",
+    "three-stdlib": "^2.23.13",
+    "zustand": "4.3.9"
+  },
+  "peerDependencies": {
+    "react": ">=16",
+    "react-dom": ">=16"
+  },
+  "devDependencies": {
+    "@babel/preset-react": "^7.23.3",
+    "@storybook/addon-docs": "^7.6.17",
+    "@storybook/addon-essentials": "^7.6.17",
+    "@storybook/addon-mdx-gfm": "^7.6.17",
+    "@storybook/addon-storysource": "^7.6.17",
+    "@storybook/addons": "^7.6.17",
+    "@storybook/react": "^7.6.17",
+    "@storybook/react-vite": "^7.6.17",
+    "@storybook/theming": "^7.6.17",
+    "@types/d3-array": "^3.2.1",
+    "@types/d3-hierarchy": "^3.1.6",
+    "@types/d3-scale": "^4.0.8",
+    "@types/react": "^18.2.57",
+    "@types/react-dom": "^18.2.19",
+    "@types/three": "^0.154.0",
+    "@typescript-eslint/eslint-plugin": "^7.1.0",
+    "@typescript-eslint/parser": "^7.1.0",
+    "@vitejs/plugin-react": "^4.2.1",
+    "@vitest/coverage-v8": "^1.3.1",
+    "autoprefixer": "^10.4.18",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-react": "^7.34.0",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-storybook": "^0.8.0",
+    "graphology-types": "^0.24.7",
+    "husky": "^9.0.11",
+    "jsdom": "^24.0.0",
+    "lint-staged": "^15.2.2",
+    "postcss-nested": "^6.0.1",
+    "postcss-preset-env": "^9.4.0",
+    "prettier": "^3.2.5",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "reakeys": "^2.0.6",
+    "rollup-plugin-peer-deps-external": "2.2.4",
+    "stats.js": "^0.17.0",
+    "storybook": "^7.6.17",
+    "typescript": "^5.3.3",
+    "vite": "^5.1.4",
+    "vite-plugin-checker": "^0.6.4",
+    "vite-plugin-css-injected-by-js": "^3.4.0",
+    "vite-plugin-dts": "^3.7.3",
+    "vite-plugin-svgr": "^4.2.0",
+    "vite-tsconfig-paths": "^4.3.1",
+    "vitest": "^1.3.1"
+  },
+  "lint-staged": {
+    "src/**/*.{js,jsx,ts,tsx}": [
+      "eslint --ext js,ts,tsx --fix"
+    ],
+    "src/**/*.{js,jsx,ts,tsx,json,css,scss,md}": [
+      "prettier --write",
+      "git add"
+    ]
+  }
+}
