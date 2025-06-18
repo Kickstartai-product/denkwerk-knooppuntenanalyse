@@ -208,7 +208,7 @@ export const NarrativeLayout = () => {
                 </DialogHeader>
                 <div className="px-6 pb-6 space-y-4">
                 <p className="text-gray-700 leading-relaxed text-left">
-                    Dit analyse-instrument is ontwikkeld door <a href="https://denkwerk.online/" target="_blank" rel="noopener noreferrer" className="text-[rgb(0,153,168)] hover:underline">DenkWerk</a> in samenwerking met <a href="https://denkwerk.online/" target="_blank" rel="noopener noreferrer" className="text-[rgb(0,153,168)] hover:underline">KickstartAI</a> als onderdeel van het DenkWerk rapport 'Weerbaarheid by Design'.
+                    Dit analyse-instrument is ontwikkeld door <a href="https://denkwerk.online/" target="_blank" rel="noopener noreferrer" className="text-[rgb(0,153,168)] hover:underline">DenkWerk</a> in samenwerking met <a href="https://kickstart.ai/" target="_blank" rel="noopener noreferrer" className="text-[rgb(0,153,168)] hover:underline">KickstartAI</a> als onderdeel van het DenkWerk rapport 'Weerbaarheid by Design'.
                 </p>
                 <p className="text-gray-700 leading-relaxed text-left">
                     DenkWerk is een onafhankelijke denktank die met krachtige ideeën bijdraagt aan een welvarend, inclusief en vooruitstrevend Nederland.
