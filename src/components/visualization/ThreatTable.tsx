@@ -12,6 +12,8 @@ import { Button } from "@/components/ui/button";
 import { ArrowUpDown } from 'lucide-react';
 import type { Node } from './networkGraph/networkService'; // Updated import path
 import type { CentralityMetric } from './MainContent'; // Import the type from MainContent
+import { longNodeDescriptions } from './shortNodeDescriptions';
+
 
 // Define the columns we want to display and sort by
 type SortableColumn = CentralityMetric | 'label' | 'nr_docs';
@@ -146,7 +148,7 @@ export const ThreatTable = ({ nodes }: ThreatTableProps) => {
             {sortedNodes.length > 0 ? (
               sortedNodes.map((node) => (
                 <TableRow key={node.id}>
-                  <TableCell className="font-medium">{node.label}</TableCell>
+                  <TableCell className="font-medium">{longNodeDescriptions[node.id]}</TableCell>
                   <TableCell className="text-right">{node.nr_docs ?? 'N/A'}</TableCell>
                   <TableCell className="text-right font-mono">{formatScore(getCentralityValue(node, 'eigen_centrality'))}</TableCell>
                   <TableCell className="text-right font-mono">{formatScore(getCentralityValue(node, 'eigen_centrality_in'))}</TableCell>

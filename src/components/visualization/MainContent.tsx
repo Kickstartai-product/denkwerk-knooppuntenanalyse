@@ -11,7 +11,8 @@ import { Sheet, SheetTrigger, SheetContent } from "@/components/ui/sheet";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Separator } from "@/components/ui/separator";
 import ThreatTable from './ThreatTable';
-import { shortNodeDescriptions, threatImpacts } from './shortNodeDescriptions';
+// MODIFICATION: Imported longNodeDescriptions
+import { shortNodeDescriptions, longNodeDescriptions, threatImpacts } from './shortNodeDescriptions';
 // Import the tutorial components
 import TutorialOverlay, { useTutorial } from './TutorialOverlay';
 
@@ -308,7 +309,11 @@ export const MainContent = ({
                   <div className="flex-shrink-0">
                     {/* Add ID for tutorial targeting */}
                     <div id="centrality-info" className="p-4 bg-muted/20 rounded-lg border border-border/20">
-                      <p className="font-semibold text-lg text-primary mb-4">{shortNodeDescriptions[selectedNode.id] || selectedNode.label}</p>
+                      {/* MODIFICATION: Adjusted margin and added long description */}
+                      <p className="font-semibold text-lg text-primary mb-1">{shortNodeDescriptions[selectedNode.id] || selectedNode.label}</p>
+                      <p className="text-sm text-muted-foreground mb-4">
+                        <strong>Volledige naam:</strong> {longNodeDescriptions[selectedNode.id] || selectedNode.id}
+                      </p>
 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
                         <div className="p-3 bg-background/50 rounded-md flex items-center gap-3">

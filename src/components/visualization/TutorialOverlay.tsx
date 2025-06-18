@@ -43,12 +43,12 @@ const TutorialOverlay: React.FC<TutorialOverlayProps> = ({
 
   // No changes needed in getStepConfig, useEffect, or other helper functions
   const getStepConfig = (): TutorialConfig | null => {
-    switch (step) {
+switch (step) {
       case TutorialStep.GRAPH_INTRO:
         return {
           targetSelector: '#graph-visual-area',
           title: 'Interactieve Grafiek',
-          content: 'Dit is een interactieve graaf die laat zien hoe dreigingen binnen en buiten verschillende categorieën met elkaar verbonden zijn. Door te scrollen kun je in- en uitzoomen.',
+          content: 'Dit is een interactieve graaf die laat zien hoe dreigingen binnen en buiten verschillende categorieën met elkaar verbonden zijn. Door te scrollen kun je in- en uitzoomen, en door te klikken en slepen kun je de graaf verslepen.',
           showNext: true,
           position: 'center',
           highlightType: 'canvas',
