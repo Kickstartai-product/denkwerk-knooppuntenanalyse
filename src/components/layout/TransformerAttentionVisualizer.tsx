@@ -7,7 +7,7 @@ interface WordPosition {
 }
 
 interface NeuralFiring {
-  id: string;
+  id:string;
   from: number;
   startTime: number;
   intensity: number;
@@ -115,11 +115,9 @@ const TransformerAttentionVisualizer = () => {
       setDisplayedText(current => {
         if (current.length >= targetSentence.length) {
           setGenerationComplete(true);
-          //setIsGenerating(false); // <-- REMOVED FROM HERE
           return current;
         }
         
-        // Trigger neural firing before adding letter
         triggerNeuralFiring();
         
         return targetSentence.slice(0, current.length + 1);
@@ -136,12 +134,10 @@ const TransformerAttentionVisualizer = () => {
 
     setNeuralFirings(current => {
       const now = Date.now();
-      // Clean up expired firings
       const activeFirings = current.filter(
         firing => now < firing.startTime + neuralFiringDuration
       );
 
-      // Add new firing if under limit
       if (activeFirings.length < maxNeuralFirings) {
         const newFiring: NeuralFiring = {
           id: `firing-${now}-${Math.random()}`,
@@ -174,12 +170,12 @@ const TransformerAttentionVisualizer = () => {
   useEffect(() => {
     if (generationComplete) {
       setNeuralFirings([]);
-      setIsGenerating(false); // <-- MOVED TO HERE: Reliably hide cursor
+      setIsGenerating(false);
     }
   }, [generationComplete]);
 
   return (
-    <div className="relative w-full max-w-4xl mx-auto p-8 h-48">
+    <div className="relative w-full max-w-4xl mx-auto p-4 sm:p-8">
       <style>{`
         @keyframes neuralPulse {
           0% { 
@@ -226,9 +222,14 @@ const TransformerAttentionVisualizer = () => {
           pointer-events: none;
           transform-origin: left center;
         }
+        
+        @keyframes blink {
+          0%, 50% { opacity: 1; }
+          51%, 100% { opacity: 0; }
+        }
       `}</style>
       
-      <div ref={containerRef} className="relative h-full">
+      <div ref={containerRef} className="relative">
         {/* Neural Activity Visualization */}
         <div className="absolute inset-0 pointer-events-none z-10">
           {neuralFirings.map(firing => {
@@ -284,10 +285,10 @@ const TransformerAttentionVisualizer = () => {
           })}
         </div>
 
-        <div className="relative z-20 text-center h-full flex flex-col justify-center">
+        <div className="relative z-20 text-center">
           {/* Highlighted sentence */}
           <div className="mb-6">
-            <p className="text-lg leading-loose">
+            <p className="text-base sm:text-lg leading-relaxed sm:leading-loose">
               {highlightedWords.map((word, index) => (
                 <span
                   key={`highlight-${index}`}
@@ -302,16 +303,16 @@ const TransformerAttentionVisualizer = () => {
             </p>
           </div>
 
-          {/* Generated text - Fixed height container */}
-          <div className="h-12 flex items-center justify-center">
-            <p className="text-lg leading-loose font-mono">
+          {/* Generated text - now with responsive text wrapping */}
+          <div className="min-h-[3rem] flex items-center justify-center">
+            <p className="text-base sm:text-lg leading-relaxed sm:leading-loose font-mono break-words">
               {displayedText.split('').map((char, index) => (
                 <span
                   key={`char-${index}`}
                   className="inline-block"
                   style={{
                     color: `rgb(${brandColorRgb})`,
-                    opacity: isGenerating || generationComplete ? 1 : 0, // Hide until generation starts
+                    opacity: isGenerating || generationComplete ? 1 : 0,
                   }}
                 >
                   {char === ' ' ? '\u00A0' : char}
@@ -331,13 +332,6 @@ const TransformerAttentionVisualizer = () => {
           </div>
         </div>
       </div>
-      
-      <style>{`
-        @keyframes blink {
-          0%, 50% { opacity: 1; }
-          51%, 100% { opacity: 0; }
-        }
-      `}</style>
     </div>
   );
 };
