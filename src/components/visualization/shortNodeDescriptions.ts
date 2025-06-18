@@ -185,3 +185,14 @@ export const threatImpacts: Record<string, string> = {
     "verdere militarisering van de ruimte en risico op satellietaanvallen": "Ernstig",
     "strategische afhankelijkheden grondstoffen en technologie van buitenlande leveranciers": "Zeer ernstig"
 };
+
+export const sourceMapping: Record<string, string> = {
+  "clingendael": "Clingendael",
+  "cpb": "CPB",
+  "hcss": "HCSS",
+  "knmi": "KNMI",
+  "pbl": "PBL",
+  "ser": "SER",
+  "tno": "TNO",
+  "wrr": "WRR"
+};

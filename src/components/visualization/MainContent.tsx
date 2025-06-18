@@ -12,7 +12,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { Separator } from "@/components/ui/separator";
 import ThreatTable from './ThreatTable';
 // MODIFICATION: Imported longNodeDescriptions
-import { shortNodeDescriptions, longNodeDescriptions, threatImpacts } from './shortNodeDescriptions';
+import { shortNodeDescriptions, longNodeDescriptions, threatImpacts, sourceMapping } from './shortNodeDescriptions';
 // Import the tutorial components
 import TutorialOverlay, { useTutorial } from './TutorialOverlay';
 
@@ -196,8 +196,8 @@ export const MainContent = ({
   <div className="relative w-full h-full">
       {/* Graph Container - Add ID for tutorial targeting */}
       <div id="graph-container" className="absolute inset-0 w-full h-full">
-      <div 
-        id="graph-visual-area" 
+      <div
+        id="graph-visual-area"
         className="absolute top-0 left-0 h-full w-full md:w-3/5 lg:w-2/3"
       />
       <GraphChart
@@ -254,10 +254,10 @@ export const MainContent = ({
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="gap-1 px-3" 
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-1 px-3"
                   onClick={startTutorial}
                   disabled={loading || !!error || nodes.length === 0}
                 >
@@ -380,7 +380,7 @@ export const MainContent = ({
                             {citation.publication_date && (citation.document_type || citation.source) && <div>•</div>}
                             {citation.document_type && <div>{citation.document_type}</div>}
                             {citation.document_type && citation.source && <div>•</div>}
-                            {citation.source && <div>{citation.source}</div>}
+                            {citation.source && <div>{sourceMapping[citation.source] || citation.source}</div>}
                           </div>
                           {citation.citaat.split('|||').map((citaatPart, partIndex) => (
                             <div key={partIndex} className="text-sm mt-2 italic bg-muted/40 p-2 rounded text-left">
@@ -450,7 +450,7 @@ export const MainContent = ({
                             <div className="flex flex-wrap text-xs text-muted-foreground mb-3 space-x-2">
                               {citation.publication_date && <div>{citation.publication_date.slice(0, 7)}</div>}
                               {citation.publication_date && (citation.source) && <div>•</div>}
-                              {citation.source && <div>{citation.source}</div>}
+                              {citation.source && <div>{sourceMapping[citation.source] || citation.source}</div>}
                             </div>
                             <div className="text-sm mt-2">
                             <div className="flex gap-2 mb-1">
