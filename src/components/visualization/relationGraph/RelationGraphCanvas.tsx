@@ -7,9 +7,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { shortNodeDescriptions } from '../shortNodeDescriptions'; // <-- 1. IMPORT ADDED
+import { shortNodeDescriptions } from '../shortNodeDescriptions';
 
-// Define types for our enhanced network data
+// --- (Interfaces: Node, Edge, categoryColors, theme, etc. remain unchanged) ---
 export interface Node {
   id: string;
   label: string;
@@ -145,12 +145,17 @@ const CitationPopup = ({ edge, onClose }: { edge: Edge; onClose: () => void; }) 
     );
   };
 
+// --- START: MODIFIED COMPONENT ---
 export const RelationGraphCanvas = ({ nodes, edges }: RelationGraphCanvasProps) => {
   const [selectedThreat, setSelectedThreat] = useState<string>('polarisatie rond complottheorieën');
   const [selectedEdge, setSelectedEdge] = useState<Edge | null>(null);
   const [hasMounted, setHasMounted] = useState(false);
   const graphRef = useRef<GraphCanvasRef | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  // <-- NEW: State for loading indicator and manual refresh -->
+  const [isGraphLoading, setIsGraphLoading] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   const safeNodes = nodes || [];
   const safeEdges = edges || [];
@@ -159,6 +164,7 @@ export const RelationGraphCanvas = ({ nodes, edges }: RelationGraphCanvasProps) 
     setHasMounted(true);
   }, []);
 
+  // --- (useMemo hooks for data filtering remain unchanged) ---
   const nodesWithOutgoingConnections = useMemo(() => {
     if (safeNodes.length === 0) return [];
     const nodesWithOutgoing = new Set<string>();
@@ -167,13 +173,10 @@ export const RelationGraphCanvas = ({ nodes, edges }: RelationGraphCanvasProps) 
     });
     return safeNodes.filter(node => nodesWithOutgoing.has(node.id));
   }, [safeNodes, safeEdges]);
-
-  // <-- 2. NEW MEMO to get the short description for the selected node
   const selectedThreatDisplayLabel = useMemo(() => {
     if (!selectedThreat) return null;
     return shortNodeDescriptions[selectedThreat] || selectedThreat;
   }, [selectedThreat]);
-
   const { filteredNodes, filteredEdges } = useMemo(() => {
     if (safeNodes.length === 0) {
       return { filteredNodes: [], filteredEdges: [] };
@@ -230,25 +233,40 @@ export const RelationGraphCanvas = ({ nodes, edges }: RelationGraphCanvasProps) 
     return { filteredNodes: processedNodes, filteredEdges: processedEdges };
   }, [selectedThreat, safeNodes, safeEdges]);
 
-  // Delay fit operation to ensure graph is fully rendered and layout has settled.
+  // <-- MODIFIED: This effect now controls the loading state -->
   useEffect(() => {
-    if (hasMounted && graphRef.current && filteredNodes.length > 0) {
-      const timer = setTimeout(() => {
-        try {
-          graphRef.current?.fitNodesInView();
-        } catch (error) {
-          console.warn('Failed to fit nodes in view:', error);
-        }
-      }, 200); // This delay is for layout physics, which is a valid use case.
-      return () => clearTimeout(timer);
+    if (!hasMounted || filteredNodes.length === 0) {
+      setIsGraphLoading(false);
+      return;
     }
-  }, [hasMounted, selectedThreat, filteredNodes]);
+
+    setIsGraphLoading(true);
+
+    const timer = setTimeout(() => {
+      try {
+        if (graphRef.current) {
+          graphRef.current.fitNodesInView();
+        }
+      } catch (error) {
+        console.warn('Failed to fit nodes in view:', error);
+      } finally {
+        setIsGraphLoading(false);
+      }
+    }, 500); // Using the more stable 500ms timeout
+
+    return () => clearTimeout(timer);
+  }, [hasMounted, selectedThreat, refreshKey, filteredNodes.length]); // Dependencies trigger on change or refresh
 
   const handleEdgeClick = useCallback((edge: Edge) => {
     setSelectedEdge(current => (current && current.id === edge.id ? null : edge));
   }, []);
+  
+  // <-- NEW: Handler for the manual refresh button -->
+  const handleRefresh = () => {
+    setRefreshKey(prevKey => prevKey + 1);
+  };
 
-  // REVISED: Show loading state until the component has mounted and received data.
+  // --- (Initial loading placeholder remains unchanged) ---
   if (!hasMounted || nodes.length === 0) {
     return (
       <div className="w-full space-y-4">
@@ -270,12 +288,12 @@ export const RelationGraphCanvas = ({ nodes, edges }: RelationGraphCanvasProps) 
 
   return (
     <div className="w-full space-y-4">
+      {/* --- (Select dropdown remains unchanged) --- */}
       <div className="flex items-center justify-center">
         <div className="w-80">
           <Select value={selectedThreat} onValueChange={setSelectedThreat}>
             <SelectTrigger className="w-full bg-white border-gray-200 shadow-sm hover:border-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors">
               <SelectValue placeholder="Selecteer een dreiging...">
-                {/* <-- 3. USE the display label in the trigger */}
                 {selectedThreatDisplayLabel}
               </SelectValue>
             </SelectTrigger>
@@ -289,7 +307,6 @@ export const RelationGraphCanvas = ({ nodes, edges }: RelationGraphCanvasProps) 
                     className="hover:bg-gray-100 focus:bg-blue-50"
                   >
                     <div className="flex flex-col">
-                       {/* <-- 4. USE the short description for the main label in the list */}
                       <span className="font-medium">{shortNodeDescriptions[node.id] || node.label}</span>
                       {node.summary && (
                         <span className="text-xs text-gray-500 truncate max-w-60">
@@ -303,20 +320,46 @@ export const RelationGraphCanvas = ({ nodes, edges }: RelationGraphCanvasProps) 
           </Select>
         </div>
       </div>
-
+      
+      {/* <-- MODIFIED: Graph container now includes loading overlay and refresh button --> */}
       <div className="w-full bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
         <div ref={containerRef} style={{ width: '100%', height: '600px', position: 'relative' }}>
-          {/* REVISED: Render GraphCanvas only if there are nodes to display */}
           {filteredNodes.length > 0 ? (
-            <GraphCanvas
-              ref={graphRef}
-              nodes={filteredNodes}
-              edges={filteredEdges}
-              theme={theme}
-              cameraMode="rotate"
-              layoutType="hierarchicalLr"
-              onEdgeClick={handleEdgeClick as any}
-            />
+            <>
+              <GraphCanvas
+                key={`${selectedThreat}-${refreshKey}`} // <-- MODIFIED: Key now includes refresh trigger
+                ref={graphRef}
+                nodes={filteredNodes}
+                edges={filteredEdges}
+                theme={theme}
+                cameraMode="rotate"
+                layoutType="hierarchicalLr"
+                onEdgeClick={handleEdgeClick as any}
+              />
+              
+              {/* <-- NEW: Loading Indicator Overlay --> */}
+              {isGraphLoading && (
+                <div className="absolute inset-0 bg-white/80 backdrop-blur-sm flex flex-col items-center justify-center z-10 transition-opacity">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+                  <p className="mt-4 text-gray-700 font-medium">Visualisatie opbouwen...</p>
+                </div>
+              )}
+
+              {/* <-- NEW: Manual Refresh Button --> */}
+              <button
+                onClick={handleRefresh}
+                className="absolute top-3 right-3 z-20 bg-white p-2 rounded-full shadow-lg hover:bg-gray-100 active:scale-95 transition-all"
+                title="Herlaad visualisatie"
+                aria-label="Herlaad visualisatie"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/>
+                  <path d="M21 3v5h-5"/>
+                  <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/>
+                  <path d="M3 21v-5h5"/>
+                </svg>
+              </button>
+            </>
           ) : (
              <div className="flex items-center justify-center h-full">
                 <div className="text-gray-500">Geen data om te visualiseren voor deze selectie.</div>
