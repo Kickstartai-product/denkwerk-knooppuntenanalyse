@@ -40,7 +40,6 @@ const fadeInAnimation = `
   }
 `;
 
-// --- MODIFIED: Simplified and separated animations for the button ---
 const buttonAnimations = `
   @keyframes buttonFadeIn {
     from {
@@ -48,18 +47,18 @@ const buttonAnimations = `
       transform: translateY(10px);
     }
     to {
-      opacity: 0.85; /* <-- CHANGED: Match the starting opacity of the glow animation */
+      opacity: 0.85;
       transform: translateY(0px);
     }
   }
 
   @keyframes subtleGlowPulse {
-    0%, 100% { 
-      opacity: 0.85; 
+    0%, 100% {
+      opacity: 0.85;
       filter: drop-shadow(0 0 2px rgba(${brandColorRgb}, 0.2));
     }
-    50% { 
-      opacity: 1; 
+    50% {
+      opacity: 1;
       filter: drop-shadow(0 0 8px rgba(${brandColorRgb}, 0.5));
     }
   }
@@ -70,11 +69,9 @@ export const NarrativeLayout = () => {
   const mainContentRef = useRef<HTMLDivElement>(null);
   const basePath = import.meta.env.BASE_URL;
 
-  // --- NEW: State for view tracking and controlled dialogs ---
   const [isMainContentVisible, setIsMainContentVisible] = useState(false);
   const [isLogoDialogOpen, setIsLogoDialogOpen] = useState(false);
 
-  // --- State and Data Fetching Logic (existing, unchanged) ---
   const [nodes, setNodes] = useState<Node[]>([]);
   const [edges, setEdges] = useState<Edge[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -86,16 +83,34 @@ export const NarrativeLayout = () => {
   const [mounted, setMounted] = useState(false);
   const [isFootnoteDialogOpen, setIsFootnoteDialogOpen] = useState(false);
 
-  
+  // --- NEW: Effect to set dynamic viewport height for mobile browsers ---
+  useEffect(() => {
+    const setDynamicViewportHeight = () => {
+      // Get the dynamic viewport height in pixels
+      const dvh = window.innerHeight;
+      // Set it as a CSS custom property on the root element
+      document.documentElement.style.setProperty('--dvh', `${dvh}px`);
+    };
 
-  // --- NEW: Intersection Observer to track main content visibility ---
+    // Set the initial value
+    setDynamicViewportHeight();
+
+    // Add event listener to update on resize or orientation change
+    window.addEventListener('resize', setDynamicViewportHeight);
+
+    // Cleanup function to remove the event listener
+    return () => {
+      window.removeEventListener('resize', setDynamicViewportHeight);
+    };
+  }, []); // Empty dependency array ensures this runs only once on mount
+
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
         setIsMainContentVisible(entry.isIntersecting);
       },
       {
-        threshold: 0.5, // Triggers when 50% of the section is visible
+        threshold: 0.5,
       }
     );
 
@@ -164,7 +179,6 @@ export const NarrativeLayout = () => {
     ref.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
-  // --- NEW: Handler for the top-left button that changes function ---
   const handleTopLeftButtonClick = () => {
     if (isMainContentVisible) {
       handleScrollTo(introRef);
@@ -179,13 +193,13 @@ export const NarrativeLayout = () => {
   });
 
   return (
-    <div className="w-full h-screen overflow-y-scroll scroll-snap-type-y-mandatory">
+    // MODIFIED: Changed h-screen to h-screen-dynamic
+    <div className="w-full h-screen-dynamic overflow-y-scroll scroll-snap-type-y-mandatory">
       <style>{`
         ${fadeInAnimation}
         ${buttonAnimations}
       `}</style>
       <ScreenAlert />
-      {/* --- MODIFIED: Header buttons with morphing behavior --- */}
       <div className="fixed top-4 left-4 md:top-8 md:left-8 z-50">
         <Dialog open={isLogoDialogOpen} onOpenChange={setIsLogoDialogOpen}>
             <DialogContent className="w-[95vw] sm:w-[90vw] max-w-2xl bg-white/95 backdrop-blur-sm p-0">
@@ -215,8 +229,7 @@ export const NarrativeLayout = () => {
         </div>
     </DialogContent>
 </Dialog>
-        
-        {/* The single button that morphs its appearance and function */}
+
         <button
             onClick={handleTopLeftButtonClick}
             aria-label={isMainContentVisible ? "Terug naar uitleg" : "Open 'Over het Rapport' dialoog"}
@@ -226,7 +239,6 @@ export const NarrativeLayout = () => {
                 ${isMainContentVisible ? 'w-48 md:w-52 rounded-full px-4' : 'w-14 md:w-16 rounded-full'}
             `}
         >
-            {/* Content for the "Back to Top" pill state */}
             <div className={`flex items-center space-x-2 md:space-x-3 transition-opacity duration-300 ${isMainContentVisible ? 'opacity-100' : 'opacity-0'}`}>
                 <img
                     src={`${basePath}denkwerk_logo.svg`}
@@ -237,8 +249,7 @@ export const NarrativeLayout = () => {
                 <span className="text-white font-medium whitespace-nowrap text-sm md:text-base">Naar Uitleg</span>
                 <ArrowUp className="h-4 w-4 md:h-5 md:w-5 text-white" />
             </div>
-            
-            {/* Content for the original logo circle state */}
+
             <div className={`absolute transition-opacity duration-300 ${isMainContentVisible ? 'opacity-0' : 'opacity-100'}`}>
                 <img
                     src={`${basePath}denkwerk_logo.svg`}
@@ -253,7 +264,8 @@ export const NarrativeLayout = () => {
       {/* --- ENHANCED NARRATIVE SECTION --- */}
       <section
         ref={introRef}
-        className="relative w-full h-screen bg-slate-50 scroll-snap-align-start overflow-hidden"
+        // MODIFIED: Using the new h-screen-dynamic class
+        className="relative w-full h-screen-dynamic bg-slate-50 scroll-snap-align-start overflow-hidden"
       >
         <div className="w-full h-full overflow-y-auto">
           <div className="relative w-full h-[200px] md:h-[250px] flex-shrink-0">
@@ -272,7 +284,7 @@ export const NarrativeLayout = () => {
               <p className="text-base md:text-lg max-w-3xl" style={getAnimationStyle(200)}>Een nieuw perspectief op de nationale veiligheid</p>
             </div>
           </div>
-          
+
           <div className="p-4 sm:p-6 md:p-8">
             <div className="max-w-4xl mx-auto space-y-8">
 
@@ -337,7 +349,7 @@ Om een netwerk van dreigingen te creëren, moeten we eerst de verbanden tussen d
                     </Card>
                 </div>
               </div>
-              
+
               {/* Section: Knooppunten identificeren */}
               <div className="relative pt-8">
                 <div className="flex items-center justify-center mb-8">
@@ -348,7 +360,7 @@ Om een netwerk van dreigingen te creëren, moeten we eerst de verbanden tussen d
                 <div className="space-y-6">
                 <p className="text-base md:text-lg text-gray-700 leading-relaxed text-left">
                 Uit deze analyse zijn duizenden citaten verzameld die wijzen op causale verbanden. Deze verbanden vormen een netwerk waarin elke dreiging een knoop is. Om de betrouwbaarheid te waarborgen, negeren we verbanden die slechts sporadisch worden geïdentificeerd.<sup><button onClick={() => setIsFootnoteDialogOpen(true)} className="text-[rgb(0,153,168)] font-bold hover:underline">1</button></sup> Dit netwerk stelt ons in staat te identificeren welke dreigingen als centrale knooppunten functioneren, ofwel dreigingen die vele andere dreigingen beïnvloeden. Door ons te richten op dreigingen die keteneffecten kunnen veroorzaken, kunnen we effectiever prioriteiten stellen in ons nationaal veiligheidsbeleid.
-                </p>                 
+                </p>
                 <Card className="border border-gray-200/60 bg-white/50 backdrop-blur-sm shadow-sm rounded-lg overflow-hidden">
                         <div className="p-4 sm:p-6">
                             <ClimateImpactGraph />
@@ -381,21 +393,22 @@ De dreigingen in de visualisatie zijn verdeeld over zes categorieën (zoals econ
                 </div>
                 </div>
               </div>
-              
+
               <div className="h-24"></div>
             </div>
           </div>
         </div>
-        
+
         <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10">
           <button
             onClick={() => handleScrollTo(mainContentRef)}
-            className="flex flex-col items-center text-gray-500 hover:text-[rgb(0,153,168)] transition-colors bg-white/90 backdrop-blur-sm rounded-full p-4 shadow-lg"
+            // MODIFIED: Added extra bottom padding for better spacing on mobile
+            className="flex flex-col items-center text-gray-500 hover:text-[rgb(0,153,168)] transition-colors bg-white/90 backdrop-blur-sm rounded-full p-4 pb-5 shadow-lg"
             aria-label="Scroll to main content"
             style={{
-              opacity: 0, // Start invisible, animation will take over
-              animation: mounted 
-                ? `buttonFadeIn 0.8s ease-out 1.2s forwards, subtleGlowPulse 3s ease-in-out 2s infinite` 
+              opacity: 0,
+              animation: mounted
+                ? `buttonFadeIn 0.8s ease-out 1.2s forwards, subtleGlowPulse 3s ease-in-out 2s infinite`
                 : 'none',
             }}
           >
@@ -408,7 +421,8 @@ De dreigingen in de visualisatie zijn verdeeld over zes categorieën (zoals econ
       {/* --- Section 2: Main Content (The Interactive Graph) --- */}
       <section
         ref={mainContentRef}
-        className="relative w-full h-screen bg-gray-900 scroll-snap-align-start"
+        // MODIFIED: Using the new h-screen-dynamic class
+        className="relative w-full h-screen-dynamic bg-gray-900 scroll-snap-align-start"
       >
         <MainContent
           nodes={nodes}
@@ -422,7 +436,7 @@ De dreigingen in de visualisatie zijn verdeeld over zes categorieën (zoals econ
           onSetEdgeDisplayMode={setEdgeDisplayMode}
         />
       </section>
-      
+
       <style>{`
         .scroll-snap-type-y-mandatory { scroll-snap-type: y mandatory; }
         .scroll-snap-align-start { scroll-snap-align: start; }
