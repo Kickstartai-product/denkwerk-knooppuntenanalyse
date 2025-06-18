@@ -339,6 +339,12 @@ export const MainContent = ({
                     {/* Add ID for tutorial targeting */}
                     <div id="citations-container" className="mt-4 flex-1 flex flex-col overflow-hidden">
                     <h5 className="text-sm font-medium mb-2 flex-shrink-0">Representatieve citaten</h5>
+                    <div className="flex items-center gap-2 mb-3 p-2 bg-amber-50 border border-amber-200 rounded-lg">
+                    <ShieldAlert className="h-4 w-4 text-amber-600 flex-shrink-0" />
+                    <p className="text-xs text-amber-700">
+                      Door <a href="https://www.rijksoverheid.nl/documenten" target="_blank" rel="noopener noreferrer" className="underline hover:no-underline">overheidswerkzaamheden</a> zijn sommige onderliggende documenten tijdelijk niet beschikbaar.
+                    </p>
+                  </div>
                     <div className="space-y-3 overflow-y-auto pr-2 flex-1">
                       {selectedNode.citaten && selectedNode.citaten.length > 0 ? (
                          selectedNode.citaten.map((citation, index) => (
@@ -405,6 +411,12 @@ export const MainContent = ({
 
                   <div className="mt-4 flex-1 flex flex-col overflow-hidden">
                     <h5 className="text-sm font-medium mb-2 flex-shrink-0">Representatieve citaten</h5>
+                    <div className="flex items-center gap-2 mb-3 p-2 bg-amber-50 border border-amber-200 rounded-lg">
+                    <ShieldAlert className="h-4 w-4 text-amber-600 flex-shrink-0" />
+                    <p className="text-xs text-amber-700">
+                      Door <a href="https://www.rijksoverheid.nl/documenten" target="_blank" rel="noopener noreferrer" className="underline hover:no-underline">overheidswerkzaamheden</a> zijn sommige onderliggende documenten tijdelijk niet beschikbaar.
+                    </p>
+                  </div>
                      <div className="space-y-3 overflow-y-auto pr-2 flex-1">
                       {selectedEdge.citaat_relaties && selectedEdge.citaat_relaties.length > 0 ? (
                         selectedEdge.citaat_relaties.map((citation, index) => (

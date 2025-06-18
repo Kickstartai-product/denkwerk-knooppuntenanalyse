@@ -10,6 +10,8 @@ import {
 } from '@/components/ui/select'; // Assuming shadcn/ui select
 import { shortNodeDescriptions } from '../shortNodeDescriptions'; // Your data helper
 import { GraphCanvas } from './GraphCanvas';
+import { ShieldAlert } from "lucide-react";
+
 
 // --- TYPE DEFINITIONS ---
 export interface Node {
@@ -89,6 +91,14 @@ const CitationPopup = ({ edge, onClose }: { edge: Edge; onClose: () => void; }) 
             <h2 className="text-xl font-semibold text-gray-800">Representatieve citaten</h2>
             <button onClick={onClose} className="text-2xl font-light text-gray-500 hover:text-gray-900 leading-none">&times;</button>
           </div>
+
+        <div className="flex items-center gap-2 mb-3 p-2 bg-amber-50 border border-amber-200 rounded-lg flex-shrink-0">
+        <ShieldAlert className="h-4 w-4 text-amber-600 flex-shrink-0" />
+        <p className="text-xs text-amber-700">
+          Door <a href="https://www.rijksoverheid.nl/documenten" target="_blank" rel="noopener noreferrer" className="underline hover:no-underline">overheidswerkzaamheden</a> zijn sommige onderliggende documenten tijdelijk niet beschikbaar.
+        </p>
+      </div>
+
           <div className="flex-1 overflow-y-auto pr-2 -mr-2 space-y-4">
             {edge.citaat_relaties && edge.citaat_relaties.length > 0 ? (
               edge.citaat_relaties.map((citation, index) => (

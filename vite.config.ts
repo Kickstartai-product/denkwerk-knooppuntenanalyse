@@ -28,6 +28,7 @@ export default defineConfig({
           // Vendor chunks
           'react-vendor': ['react', 'react-dom'],
           'recharts-vendor': ['recharts'],
+          'reagraph-vendor': ['reagraph'],
           // Group shadcn components together
           'shadcn': [
             '@/components/ui/button',
