@@ -145,7 +145,7 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
                             x2={calc.x2} y2={calc.y2}
                             stroke={strokeColor}
                             strokeWidth={6}
-                            opacity={isHovered ? 1 : 0.7}
+                            opacity={isHovered ? 1 : 0.5}
                             markerId={markerId}
                             onMouseEnter={() => setHoveredEdgeId(calc.edge.id)}
                             onMouseLeave={() => setHoveredEdgeId(null)}
