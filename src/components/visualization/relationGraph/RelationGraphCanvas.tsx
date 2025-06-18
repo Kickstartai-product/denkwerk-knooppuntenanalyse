@@ -85,7 +85,7 @@ const CitationPopup = ({ edge, onClose }: { edge: Edge; onClose: () => void; }) 
     if (!edge) return null;
 
     return (
-      <div className="absolute inset-0 flex items-center justify-center p-4 bg-gray-500 bg-opacity-20 z-20" onClick={onClose}>
+      <div className="absolute inset-0 flex items-center justify-center p-4 bg-gray-500 bg-opacity-20 z-50" onClick={onClose}>
         <div className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-2xl max-h-[540px] flex flex-col" onClick={e => e.stopPropagation()}>
           <div className="flex justify-between items-center mb-4 flex-shrink-0">
             <h2 className="text-xl font-semibold text-gray-800">Representatieve citaten</h2>
@@ -139,7 +139,7 @@ const CitationPopup = ({ edge, onClose }: { edge: Edge; onClose: () => void; }) 
 
 const ColorLegend = ({ categories }: { categories: { name: string; color: string; }[] }) => {
   return (
-    <div className="bg-white/80 backdrop-blur-sm p-3 rounded-lg shadow-lg border border-gray-200/50">
+<div className="bg-white/95 p-3 rounded-lg shadow-lg border border-gray-200/50">
       <div className="space-y-1.5">
         {categories.map(({ name, color }) => (
           <div key={name} className="flex items-center gap-2">
