@@ -92,7 +92,6 @@ const getImpactLevel = (node: Node | null): string => {
   return threatImpacts[node.id] || "Onbekend";
 };
 
-
 export const MainContent = ({
   nodes,
   loading,
@@ -112,6 +111,9 @@ export const MainContent = ({
   const [maxNodeSize] = useState<number>(15);
   const [edgeWeightCutoff] = useState<number>(0.5);
   const [useWeightBasedEdgeSize] = useState<boolean>(true);
+  
+  // Add viewport height detection
+  const [isCompactView, setIsCompactView] = useState<boolean>(false);
 
   // Initialize tutorial hook
   const {
@@ -128,6 +130,18 @@ export const MainContent = ({
 
   const sourceNodeForEdge = selectedEdge ? nodes.find(n => n.id === selectedEdge.source) : null;
   const targetNodeForEdge = selectedEdge ? nodes.find(n => n.id === selectedEdge.target) : null;
+
+  // Check viewport height on mount and resize
+  useEffect(() => {
+    const checkViewportHeight = () => {
+      setIsCompactView(window.innerHeight < 700);
+    };
+    
+    checkViewportHeight();
+    window.addEventListener('resize', checkViewportHeight);
+    
+    return () => window.removeEventListener('resize', checkViewportHeight);
+  }, []);
 
   const handleNodeSelect = (nodeId: string | null) => {
     setSelectedEdge(null);
@@ -162,7 +176,6 @@ export const MainContent = ({
       });
   }, [filteredNodes, scoringMetric]);
 
-
   useEffect(() => {
     if (selectedNodeId && graphRef.current) {
       graphRef.current.centerOnNode(selectedNodeId);
@@ -178,13 +191,13 @@ export const MainContent = ({
 
   const renderCitationParts = (citationText: string) => {
     if (!citationText.includes(" ||| ")) {
-      return <div className="italic bg-muted/40 p-3 rounded text-sm text-left">"{citationText}"</div>;
+      return <div className={`italic bg-muted/40 rounded text-left ${isCompactView ? 'p-2 text-xs' : 'p-3 text-sm'}`}>"{citationText}"</div>;
     }
     const parts = citationText.split(" ||| ");
     return (
-      <div className="space-y-2">
+      <div className={isCompactView ? "space-y-1" : "space-y-2"}>
         {parts.map((part, i) => (
-          <div key={i} className="italic bg-muted/40 p-3 rounded text-sm text-left">
+          <div key={i} className={`italic bg-muted/40 rounded text-left ${isCompactView ? 'p-2 text-xs' : 'p-3 text-sm'}`}>
             "{part.trim()}"
           </div>
         ))}
@@ -291,9 +304,9 @@ export const MainContent = ({
         showPanel || window.innerWidth >= 768 ? 'translate-x-0' : 'translate-x-full'
       } ${ window.innerWidth >= 768 ? 'md:translate-x-0' : '' }`}>
         <Card className="h-full bg-background/60 backdrop-blur-md border-0 shadow-lg rounded-l-lg rounded-r-none overflow-hidden">
-          <div className="flex flex-col h-full p-4">
-            <div className="mb-4 pt-2">
-              <h4 className="text-sm font-medium mb-2">Selecteer Dreiging</h4>
+          <div className={`flex flex-col h-full ${isCompactView ? 'p-2' : 'p-4'}`}>
+            <div className={`${isCompactView ? 'mb-2 pt-1' : 'mb-4 pt-2'}`}>
+              <h4 className={`font-medium ${isCompactView ? 'text-xs mb-1' : 'text-sm mb-2'}`}>Selecteer Dreiging</h4>
               <div className="flex gap-2 items-center">
                 <div className="flex-1">
                   {/* Add ID for tutorial targeting */}
@@ -307,20 +320,20 @@ export const MainContent = ({
                   </div>
                 </div>
               </div>
-              <p className="text-xs text-muted-foreground mt-1">
+              <p className={`text-muted-foreground ${isCompactView ? 'text-[10px] mt-0.5' : 'text-xs mt-1'}`}>
                 Gesorteerd op centraliteit (hoogste eerst)
               </p>
             </div>
 
-            <Separator className="my-2 bg-border/30" />
+            <Separator className={`bg-border/30 ${isCompactView ? 'my-1' : 'my-2'}`} />
 
             <div className="flex-1 overflow-hidden flex flex-col">
-              <h4 className="text-sm font-medium mb-3">
+              <h4 className={`font-medium ${isCompactView ? 'text-xs mb-1' : 'text-sm mb-3'}`}>
                   {selectedNode ? "Geselecteerde Dreiging" : selectedEdge ? "Geselecteerde Verbinding" : "Details"}
               </h4>
 
               {!selectedNode && !selectedEdge && (
-                <div className="text-sm text-muted-foreground p-4 bg-muted/30 rounded-lg">
+                <div className={`text-muted-foreground bg-muted/30 rounded-lg ${isCompactView ? 'text-xs p-2' : 'text-sm p-4'}`}>
                   Klik op een dreiging of verbinding in de grafiek om details te bekijken.
                 </div>
               )}
@@ -329,53 +342,53 @@ export const MainContent = ({
                 <div className="flex flex-col h-full overflow-hidden">
                   <div className="flex-shrink-0">
                     {/* Add ID for tutorial targeting */}
-                    <div id="centrality-info" className="p-4 bg-muted/20 rounded-lg border border-border/20">
+                    <div id="centrality-info" className={`bg-muted/20 rounded-lg border border-border/20 ${isCompactView ? 'p-2' : 'p-4'}`}>
                       {/* MODIFICATION: Adjusted margin and added long description */}
-                      <p className="font-semibold text-lg text-primary mb-1">{shortNodeDescriptions[selectedNode.id] || selectedNode.label}</p>
-                      <p className="text-sm text-muted-foreground mb-4">
+                      <p className={`font-semibold text-primary ${isCompactView ? 'text-sm mb-0.5' : 'text-lg mb-1'}`}>{shortNodeDescriptions[selectedNode.id] || selectedNode.label}</p>
+                      <p className={`text-muted-foreground ${isCompactView ? 'text-xs mb-2' : 'text-sm mb-4'}`}>
                         <strong>Volledige naam:</strong> {longNodeDescriptions[selectedNode.id] || selectedNode.id}
                       </p>
 
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
-                        <div className="p-3 bg-background/50 rounded-md flex items-center gap-3">
-                          <Move className="h-5 w-5 text-muted-foreground" />
+                      <div className={`grid grid-cols-1 md:grid-cols-2 text-sm ${isCompactView ? 'gap-2' : 'gap-3'}`}>
+                        <div className={`bg-background/50 rounded-md flex items-center gap-3 ${isCompactView ? 'p-2' : 'p-3'}`}>
+                          <Move className={`text-muted-foreground ${isCompactView ? 'h-4 w-4' : 'h-5 w-5'}`} />
                           <div>
-                            <span className="text-muted-foreground">Centraliteit</span>
-                            <p className="font-bold text-sm text-foreground">{getCentralityTier(selectedNode, nodes)}</p>
+                            <span className={`text-muted-foreground ${isCompactView ? 'text-xs' : ''}`}>Centraliteit</span>
+                            <p className={`font-bold text-foreground ${isCompactView ? 'text-xs' : 'text-sm'}`}>{getCentralityTier(selectedNode, nodes)}</p>
                           </div>
                         </div>
 
-                        <div className="p-3 bg-background/50 rounded-md flex items-center gap-3">
-                          <ShieldAlert className="h-5 w-5 text-muted-foreground" />
+                        <div className={`bg-background/50 rounded-md flex items-center gap-3 ${isCompactView ? 'p-2' : 'p-3'}`}>
+                          <ShieldAlert className={`text-muted-foreground ${isCompactView ? 'h-4 w-4' : 'h-5 w-5'}`} />
                           <div>
-                            <span className="text-muted-foreground">Impact</span>
-                            <p className="font-semibold text-sm text-foreground">{getImpactLevel(selectedNode)}</p>
+                            <span className={`text-muted-foreground ${isCompactView ? 'text-xs' : ''}`}>Impact</span>
+                            <p className={`font-semibold text-foreground ${isCompactView ? 'text-xs' : 'text-sm'}`}>{getImpactLevel(selectedNode)}</p>
                           </div>
                         </div>
                       </div>
                     </div>
                   </div>
 
-                  <div className="mt-4 flex-1 flex flex-col overflow-hidden">
+                  <div className={`flex-1 flex flex-col overflow-hidden ${isCompactView ? 'mt-2' : 'mt-4'}`}>
                     {/* Add ID for tutorial targeting */}
-                    <div id="citations-container" className="mt-4 flex-1 flex flex-col overflow-hidden">
-                    <h5 className="text-sm font-medium mb-2 flex-shrink-0">Representatieve citaten</h5>
-                    <div className="flex items-center gap-2 mb-3 p-2 bg-amber-50 border border-amber-200 rounded-lg">
-                    <ShieldAlert className="h-4 w-4 text-amber-600 flex-shrink-0" />
-                    <p className="text-xs text-amber-700">
+                    <div id="citations-container" className={`flex-1 flex flex-col overflow-hidden ${isCompactView ? 'mt-2' : 'mt-4'}`}>
+                    <h5 className={`font-medium flex-shrink-0 ${isCompactView ? 'text-xs mb-1' : 'text-sm mb-2'}`}>Representatieve citaten</h5>
+                    <div className={`flex items-center gap-2 p-2 bg-amber-50 border border-amber-200 rounded-lg ${isCompactView ? 'mb-2' : 'mb-3'}`}>
+                    <ShieldAlert className={`text-amber-600 flex-shrink-0 ${isCompactView ? 'h-3 w-3' : 'h-4 w-4'}`} />
+                    <p className={`text-amber-700 ${isCompactView ? 'text-[10px]' : 'text-xs'}`}>
                       Door <a href="https://www.rijksoverheid.nl/documenten" target="_blank" rel="noopener noreferrer" className="underline hover:no-underline">overheidswerkzaamheden</a> zijn sommige onderliggende documenten tijdelijk niet beschikbaar.
                     </p>
                   </div>
-                    <div className="space-y-3 overflow-y-auto pr-2 flex-1">
+                    <div className={`overflow-y-auto pr-2 flex-1 ${isCompactView ? 'space-y-2' : 'space-y-3'}`}>
                       {selectedNode.citaten && selectedNode.citaten.length > 0 ? (
                          selectedNode.citaten.map((citation, index) => (
-                          <div key={index} className="p-3 bg-background/50 rounded-lg border border-border/20">
-                            <div className="flex justify-between items-start mb-2">
-                              <a href={formatDocumentLink(citation.document_link)} target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-primary hover:underline flex-1 mr-2">
+                          <div key={index} className={`bg-background/50 rounded-lg border border-border/20 ${isCompactView ? 'p-2' : 'p-3'}`}>
+                            <div className={`flex justify-between items-start ${isCompactView ? 'mb-1' : 'mb-2'}`}>
+                              <a href={formatDocumentLink(citation.document_link)} target="_blank" rel="noopener noreferrer" className={`font-medium text-primary hover:underline flex-1 mr-2 ${isCompactView ? 'text-xs' : 'text-sm'}`}>
                                 {citation.title || "Onbekende Titel"}
                               </a>
                             </div>
-                          <div className="flex flex-wrap text-xs text-muted-foreground mb-2 space-x-2 text-left">
+                          <div className={`flex flex-wrap text-muted-foreground space-x-2 text-left ${isCompactView ? 'text-[10px] mb-1' : 'text-xs mb-2'}`}>
                             {citation.publication_date && <div>{citation.publication_date.slice(0, 7)}</div>}
                             {citation.publication_date && (citation.document_type || citation.source) && <div>•</div>}
                             {citation.document_type && <div>{citation.document_type}</div>}
@@ -383,14 +396,14 @@ export const MainContent = ({
                             {citation.source && <div>{sourceMapping[citation.source] || citation.source}</div>}
                           </div>
                           {citation.citaat.split('|||').map((citaatPart, partIndex) => (
-                            <div key={partIndex} className="text-sm mt-2 italic bg-muted/40 p-2 rounded text-left">
+                            <div key={partIndex} className={`italic bg-muted/40 p-2 rounded text-left ${isCompactView ? 'text-xs mt-1' : 'text-sm mt-2'}`}>
                               "{citaatPart.trim()}"
                             </div>
                           ))}
                           </div>
                          ))
                       ) : (
-                        <div className="text-sm text-muted-foreground p-3 bg-muted/30 rounded-lg">
+                        <div className={`text-muted-foreground bg-muted/30 rounded-lg ${isCompactView ? 'text-xs p-2' : 'text-sm p-3'}`}>
                           Geen citaties beschikbaar voor deze dreiging.
                         </div>
                       )}
@@ -403,62 +416,62 @@ export const MainContent = ({
               {selectedEdge && (
                 <div className="flex flex-col h-full overflow-hidden">
                    <div className="flex-shrink-0">
-                    <div className="p-4 bg-muted/20 rounded-lg border border-border/20">
-                      <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mb-4">
-                          <span className="font-semibold text-lg text-primary">{shortNodeDescriptions[sourceNodeForEdge?.id || ''] || sourceNodeForEdge?.label || 'Onbekend'}</span>
-                          <ArrowBigRight className="h-5 w-5 text-muted-foreground flex-shrink-0" />
-                          <span className="font-semibold text-lg text-primary">{shortNodeDescriptions[targetNodeForEdge?.id || ''] || targetNodeForEdge?.label || 'Onbekend'}</span>
+                    <div className={`bg-muted/20 rounded-lg border border-border/20 ${isCompactView ? 'p-2' : 'p-4'}`}>
+                      <div className={`flex flex-wrap items-center gap-x-2 gap-y-1 ${isCompactView ? 'mb-2' : 'mb-4'}`}>
+                          <span className={`font-semibold text-primary ${isCompactView ? 'text-sm' : 'text-lg'}`}>{shortNodeDescriptions[sourceNodeForEdge?.id || ''] || sourceNodeForEdge?.label || 'Onbekend'}</span>
+                          <ArrowBigRight className={`text-muted-foreground flex-shrink-0 ${isCompactView ? 'h-4 w-4' : 'h-5 w-5'}`} />
+                          <span className={`font-semibold text-primary ${isCompactView ? 'text-sm' : 'text-lg'}`}>{shortNodeDescriptions[targetNodeForEdge?.id || ''] || targetNodeForEdge?.label || 'Onbekend'}</span>
                       </div>
                       
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
-                        <div className="p-3 bg-background/50 rounded-md flex items-center gap-3">
-                          <BookText className="h-5 w-5 text-muted-foreground" />
+                      <div className={`grid grid-cols-1 md:grid-cols-2 text-sm ${isCompactView ? 'gap-2' : 'gap-3'}`}>
+                        <div className={`bg-background/50 rounded-md flex items-center gap-3 ${isCompactView ? 'p-2' : 'p-3'}`}>
+                          <BookText className={`text-muted-foreground ${isCompactView ? 'h-4 w-4' : 'h-5 w-5'}`} />
                           <div>
-                            <span className="text-muted-foreground">Gevonden citaten</span>
-                            <p className="font-bold text-sm text-foreground">{selectedEdge.raw_count || 0}</p>
+                            <span className={`text-muted-foreground ${isCompactView ? 'text-xs' : ''}`}>Gevonden citaten</span>
+                            <p className={`font-bold text-foreground ${isCompactView ? 'text-xs' : 'text-sm'}`}>{selectedEdge.raw_count || 0}</p>
                           </div>
                         </div>
 
-                        <div className="p-3 bg-background/50 rounded-md flex items-center gap-3">
-                          <ShieldAlert className="h-5 w-5 text-muted-foreground" />
+                        <div className={`bg-background/50 rounded-md flex items-center gap-3 ${isCompactView ? 'p-2' : 'p-3'}`}>
+                          <ShieldAlert className={`text-muted-foreground ${isCompactView ? 'h-4 w-4' : 'h-5 w-5'}`} />
                           <div>
-                            <span className="text-muted-foreground">Impact van Gevolg</span>
-                            <p className="font-semibold text-sm text-foreground">{getImpactLevel(targetNodeForEdge as any)}</p>
+                            <span className={`text-muted-foreground ${isCompactView ? 'text-xs' : ''}`}>Impact van Gevolg</span>
+                            <p className={`font-semibold text-foreground ${isCompactView ? 'text-xs' : 'text-sm'}`}>{getImpactLevel(targetNodeForEdge as any)}</p>
                           </div>
                         </div>
                       </div>
                     </div>
                   </div>
 
-                  <div className="mt-4 flex-1 flex flex-col overflow-hidden">
-                    <h5 className="text-sm font-medium mb-2 flex-shrink-0">Representatieve citaten</h5>
-                    <div className="flex items-center gap-2 mb-3 p-2 bg-amber-50 border border-amber-200 rounded-lg">
-                    <ShieldAlert className="h-4 w-4 text-amber-600 flex-shrink-0" />
-                    <p className="text-xs text-amber-700">
+                  <div className={`flex-1 flex flex-col overflow-hidden ${isCompactView ? 'mt-2' : 'mt-4'}`}>
+                    <h5 className={`font-medium flex-shrink-0 ${isCompactView ? 'text-xs mb-1' : 'text-sm mb-2'}`}>Representatieve citaten</h5>
+                    <div className={`flex items-center gap-2 p-2 bg-amber-50 border border-amber-200 rounded-lg ${isCompactView ? 'mb-2' : 'mb-3'}`}>
+                    <ShieldAlert className={`text-amber-600 flex-shrink-0 ${isCompactView ? 'h-3 w-3' : 'h-4 w-4'}`} />
+                    <p className={`text-amber-700 ${isCompactView ? 'text-[10px]' : 'text-xs'}`}>
                       Door <a href="https://www.rijksoverheid.nl/documenten" target="_blank" rel="noopener noreferrer" className="underline hover:no-underline">overheidswerkzaamheden</a> zijn sommige onderliggende documenten tijdelijk niet beschikbaar.
                     </p>
                   </div>
-                     <div className="space-y-3 overflow-y-auto pr-2 flex-1">
+                     <div className={`overflow-y-auto pr-2 flex-1 ${isCompactView ? 'space-y-2' : 'space-y-3'}`}>
                       {selectedEdge.citaat_relaties && selectedEdge.citaat_relaties.length > 0 ? (
                         selectedEdge.citaat_relaties.map((citation, index) => (
-                           <div key={index} className="p-4 bg-background/50 rounded-lg border border-border/20">
-                            <div className="flex justify-between items-start mb-2">
-                              <a href={formatDocumentLink(citation.document_link)} target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-primary hover:underline flex-1 mr-2">
+                           <div key={index} className={`bg-background/50 rounded-lg border border-border/20 ${isCompactView ? 'p-2' : 'p-4'}`}>
+                            <div className={`flex justify-between items-start ${isCompactView ? 'mb-1' : 'mb-2'}`}>
+                              <a href={formatDocumentLink(citation.document_link)} target="_blank" rel="noopener noreferrer" className={`font-medium text-primary hover:underline flex-1 mr-2 ${isCompactView ? 'text-xs' : 'text-sm'}`}>
                                 {citation.title || "Onbekende Titel"}
                               </a>
                             </div>
-                            <div className="flex flex-wrap text-xs text-muted-foreground mb-3 space-x-2">
+                            <div className={`flex flex-wrap text-muted-foreground space-x-2 ${isCompactView ? 'text-[10px] mb-2' : 'text-xs mb-3'}`}>
                               {citation.publication_date && <div>{citation.publication_date.slice(0, 7)}</div>}
                               {citation.publication_date && (citation.source) && <div>•</div>}
                               {citation.source && <div>{sourceMapping[citation.source] || citation.source}</div>}
                             </div>
-                            <div className="text-sm mt-2">
-                            <div className="flex gap-2 mb-1">
-                              <span className="text-xs font-medium bg-primary/10 px-2 py-0.5 rounded w-16 flex-shrink-0">Oorzaak</span>
+                            <div className={isCompactView ? 'text-xs mt-1' : 'text-sm mt-2'}>
+                            <div className={`flex gap-2 ${isCompactView ? 'mb-0.5' : 'mb-1'}`}>
+                              <span className={`font-medium bg-primary/10 px-2 py-0.5 rounded w-16 flex-shrink-0 ${isCompactView ? 'text-[10px]' : 'text-xs'}`}>Oorzaak</span>
                               <span className="text-left flex-1">{citation.oorzaak}</span>
                             </div>
-                            <div className="flex gap-2 mb-3">
-                              <span className="text-xs font-medium bg-primary/10 px-2 py-0.5 rounded w-16 flex-shrink-0">Gevolg</span>
+                            <div className={`flex gap-2 ${isCompactView ? 'mb-1' : 'mb-3'}`}>
+                              <span className={`font-medium bg-primary/10 px-2 py-0.5 rounded w-16 flex-shrink-0 ${isCompactView ? 'text-[10px]' : 'text-xs'}`}>Gevolg</span>
                               <span className="text-left flex-1">{citation.gevolg}</span>
                             </div>
                               {renderCitationParts(citation.citaat)}
@@ -466,7 +479,7 @@ export const MainContent = ({
                           </div>
                         ))
                       ) : (
-                        <div className="text-sm text-muted-foreground p-3 bg-muted/30 rounded-lg">
+                        <div className={`text-muted-foreground bg-muted/30 rounded-lg ${isCompactView ? 'text-xs p-2' : 'text-sm p-3'}`}>
                           Geen citaties beschikbaar voor deze verbinding.
                         </div>
                       )}
@@ -476,7 +489,7 @@ export const MainContent = ({
               )}
             </div>
 
-            <div className="md:hidden mt-4">
+            <div className={`md:hidden ${isCompactView ? 'mt-2' : 'mt-4'}`}>
               <Button variant="outline" className="w-full" onClick={() => setShowPanel(false)}>
                 Sluit Paneel
               </Button>
