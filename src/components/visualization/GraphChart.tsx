@@ -1,6 +1,7 @@
 import { GraphCanvas, GraphCanvasRef, useSelection, lightTheme } from 'reagraph';
 import { useRef, useImperativeHandle, forwardRef, useEffect, useMemo, useCallback } from 'react';
 import { Node as CustomNode, Edge } from './networkGraph/networkService';
+import { useWindowSize, MOBILE_BREAKPOINT } from '@/hooks/useWindowSize';
 
 // Define the structure for position data
 interface NodePositionData {
@@ -192,6 +193,10 @@ const GraphChart = forwardRef<GraphChartRef, GraphChartProps>(
     categorySpreadConfig = exampleCategorySpreadConfiguration,
   }, ref) => {
     const graphRef = useRef<GraphCanvasRef>(null);
+    
+    // Add mobile detection
+    const windowWidth = useWindowSize();
+    const isMobile = windowWidth !== null && windowWidth < MOBILE_BREAKPOINT;
 
     const processedNodes = useMemo(() => {
       return nodes
@@ -370,48 +375,49 @@ const GraphChart = forwardRef<GraphChartRef, GraphChartProps>(
       }
     }, [selectedEdge, selectedNodeId, selections, clearSelections, setSelections, processedEdgeIds, onEdgeClick]);
 
-
-  useEffect(() => {
-    // A function to apply the desired camera transformation.
-    const applyInitialCameraTransform = () => {
-      if (graphRef.current) {
-
-        const controls = graphRef.current.getControls();
-        if (controls && controls.pan) {
-          // The pan operation is now more likely to be on the fully rendered graph.
-          controls.pan(230, 0);
-        }
-        graphRef.current.zoomOut();
-      }
-    };
-
-    // The 100ms delay is a pragmatic choice, but for very complex graphs,
-    // you might consider a slightly longer delay or a more sophisticated
-    // check if the library provides any status flags.
-    const timer = setTimeout(applyInitialCameraTransform, 1000);
-
-    // Cleanup function to clear the timeout if the component unmounts
-    // or if the dependencies change before the timeout completes.
-    return () => clearTimeout(timer);
-  }, [nodes, edges]); // This effect is correctly dependent on nodes and edges.
-    
-useImperativeHandle(ref, () => ({
-    centerOnNode: (nodeId: string) => {
+    useEffect(() => {
+      // Skip camera transformations on mobile
+      if (isMobile) return;
+      
+      // A function to apply the desired camera transformation.
+      const applyInitialCameraTransform = () => {
         if (graphRef.current) {
-            const cameraControls = graphRef.current.getControls();
-            graphRef.current.centerGraph([nodeId]);
-            const isZoomLessThanOne = cameraControls.camera.zoom < 1;
-
-            if (isZoomLessThanOne) {
-                graphRef.current.zoomIn();
-            }
+          const controls = graphRef.current.getControls();
+          if (controls && controls.pan) {
+            // The pan operation is now more likely to be on the fully rendered graph.
+            controls.pan(230, 0);
+          }
+          graphRef.current.zoomOut();
         }
-    },
-    fitAllNodesInView: () => graphRef.current?.fitNodesInView(),
-    zoomIn: () => graphRef.current?.zoomIn(),
-    zoomOut: () => graphRef.current?.zoomOut(),
-    resetCamera: () => graphRef.current?.resetControls()
-}));
+      };
+
+      // The 100ms delay is a pragmatic choice, but for very complex graphs,
+      // you might consider a slightly longer delay or a more sophisticated
+      // check if the library provides any status flags.
+      const timer = setTimeout(applyInitialCameraTransform, 1000);
+
+      // Cleanup function to clear the timeout if the component unmounts
+      // or if the dependencies change before the timeout completes.
+      return () => clearTimeout(timer);
+    }, [nodes, edges, isMobile]); // Added isMobile to dependencies
+    
+    useImperativeHandle(ref, () => ({
+        centerOnNode: (nodeId: string) => {
+            if (graphRef.current) {
+                const cameraControls = graphRef.current.getControls();
+                graphRef.current.centerGraph([nodeId]);
+                const isZoomLessThanOne = cameraControls.camera.zoom < 1;
+
+                if (isZoomLessThanOne) {
+                    graphRef.current.zoomIn();
+                }
+            }
+        },
+        fitAllNodesInView: () => graphRef.current?.fitNodesInView(),
+        zoomIn: () => graphRef.current?.zoomIn(),
+        zoomOut: () => graphRef.current?.zoomOut(),
+        resetCamera: () => graphRef.current?.resetControls()
+    }));
 
     const handleNodeClick = (node: CustomNode) => {
       if (onEdgeClick) onEdgeClick(null);

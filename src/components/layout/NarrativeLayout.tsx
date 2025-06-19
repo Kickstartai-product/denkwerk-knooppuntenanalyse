@@ -19,6 +19,7 @@ import { getNetworkWithCentralityMetrics } from '../visualization/networkGraph/n
 import { DEFAULT_THREAT_IMPACT_WEIGHTS, ThreatImpactWeights } from '../visualization/networkGraph/threatImpactService';
 import { EdgeDisplayMode } from '../visualization/EdgeDisplayToggle';
 import ScreenAlert from '../ui/ScreenAlert';
+import { useWindowSize, MOBILE_BREAKPOINT } from '@/hooks/useWindowSize';
 
 export type CentralityMetric =
   'eigen_centrality' |
@@ -82,6 +83,10 @@ export const NarrativeLayout = () => {
   const [threatImpactWeights] = useState<ThreatImpactWeights>(DEFAULT_THREAT_IMPACT_WEIGHTS);
   const [mounted, setMounted] = useState(false);
   const [isFootnoteDialogOpen, setIsFootnoteDialogOpen] = useState(false);
+
+  // Add mobile detection
+  const windowWidth = useWindowSize();
+  const isMobile = windowWidth !== null && windowWidth < MOBILE_BREAKPOINT;
 
   // --- NEW: Effect to set dynamic viewport height for mobile browsers ---
   useEffect(() => {
@@ -229,36 +234,48 @@ export const NarrativeLayout = () => {
         </div>
     </DialogContent>
 </Dialog>
+  <button
+    onClick={handleTopLeftButtonClick}
+    aria-label={isMainContentVisible ? "Terug naar uitleg" : "Open 'Over het Rapport' dialoog"}
+    className={`
+      group flex items-center justify-center h-14 md:h-16 bg-[rgb(0,153,168)] shadow-lg hover:scale-105
+      transition-all duration-500 ease-in-out
+      ${isMainContentVisible && !isMobile ? 'w-48 md:w-52 rounded-full px-4' : 'w-14 md:w-16 rounded-full'}
+    `}
+  >
+    {/* Show full content on desktop when main content is visible */}
+    <div className={`flex items-center space-x-2 md:space-x-3 transition-opacity duration-300 ${
+      isMainContentVisible && !isMobile ? 'opacity-100' : 'opacity-0'
+    }`}>
+      <img
+        src={`${basePath}denkwerk_logo.svg`}
+        alt="Denkwerk Logo"
+        className="h-5 md:h-6 w-auto"
+        style={{ filter: 'brightness(0) invert(1)' }}
+      />
+      <span className="text-white font-medium whitespace-nowrap text-sm md:text-base">Naar Uitleg</span>
+      <ArrowUp className="h-4 w-4 md:h-5 md:w-5 text-white" />
+    </div>
 
-        <button
-            onClick={handleTopLeftButtonClick}
-            aria-label={isMainContentVisible ? "Terug naar uitleg" : "Open 'Over het Rapport' dialoog"}
-            className={`
-                group flex items-center justify-center h-14 md:h-16 bg-[rgb(0,153,168)] shadow-lg hover:scale-105
-                transition-all duration-500 ease-in-out
-                ${isMainContentVisible ? 'w-48 md:w-52 rounded-full px-4' : 'w-14 md:w-16 rounded-full'}
-            `}
-        >
-            <div className={`flex items-center space-x-2 md:space-x-3 transition-opacity duration-300 ${isMainContentVisible ? 'opacity-100' : 'opacity-0'}`}>
-                <img
-                    src={`${basePath}denkwerk_logo.svg`}
-                    alt="Denkwerk Logo"
-                    className="h-5 md:h-6 w-auto"
-                    style={{ filter: 'brightness(0) invert(1)' }}
-                />
-                <span className="text-white font-medium whitespace-nowrap text-sm md:text-base">Naar Uitleg</span>
-                <ArrowUp className="h-4 w-4 md:h-5 md:w-5 text-white" />
-            </div>
+    {/* Show just arrow on mobile when main content is visible */}
+    <div className={`absolute transition-opacity duration-300 ${
+      isMainContentVisible && isMobile ? 'opacity-100' : 'opacity-0'
+    }`}>
+      <ArrowUp className="h-5 w-5 text-white" />
+    </div>
 
-            <div className={`absolute transition-opacity duration-300 ${isMainContentVisible ? 'opacity-0' : 'opacity-100'}`}>
-                <img
-                    src={`${basePath}denkwerk_logo.svg`}
-                    alt="Denkwerk Logo"
-                    className="h-7 md:h-8 w-auto"
-                    style={{ filter: 'brightness(0) invert(1)' }}
-                />
-            </div>
-        </button>
+    {/* Show logo when main content is not visible (both mobile and desktop) */}
+    <div className={`absolute transition-opacity duration-300 ${
+      !isMainContentVisible ? 'opacity-100' : 'opacity-0'
+    }`}>
+      <img
+        src={`${basePath}denkwerk_logo.svg`}
+        alt="Denkwerk Logo"
+        className="h-7 md:h-8 w-auto"
+        style={{ filter: 'brightness(0) invert(1)' }}
+      />
+    </div>
+  </button>
       </div>
 
       {/* --- ENHANCED NARRATIVE SECTION --- */}

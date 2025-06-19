@@ -15,6 +15,8 @@ import ThreatTable from './ThreatTable';
 import { shortNodeDescriptions, longNodeDescriptions, threatImpacts, sourceMapping } from './shortNodeDescriptions';
 // Import the tutorial components
 import TutorialOverlay, { useTutorial } from './TutorialOverlay';
+// Import mobile detection hook
+import { useWindowSize, MOBILE_BREAKPOINT } from '@/hooks/useWindowSize';
 
 interface MainContentProps {
   nodes: Node[];
@@ -114,6 +116,10 @@ export const MainContent = ({
   
   // Add viewport height detection
   const [isCompactView, setIsCompactView] = useState<boolean>(false);
+  
+  // Add mobile detection
+  const windowWidth = useWindowSize();
+  const isMobile = windowWidth !== null && windowWidth < MOBILE_BREAKPOINT;
 
   // Initialize tutorial hook
   const {
@@ -237,54 +243,56 @@ export const MainContent = ({
         <ColorLegend />
       </div>
 
-      {/* Top controls with Tutorial button */}
-      <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-10 flex items-center space-x-2">
-        <div className="bg-background/70 backdrop-blur-md p-2 rounded-lg shadow-lg">
-          <Sheet>
+      {/* Top controls with Tutorial button - Hide on mobile */}
+      {!isMobile && (
+        <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-10 flex items-center space-x-2">
+          <div className="bg-background/70 backdrop-blur-md p-2 rounded-lg shadow-lg">
+            <Sheet>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <SheetTrigger asChild>
+                      <Button variant="outline" size="sm" className="gap-1 px-3" disabled={loading || !!error || nodes.length === 0}>
+                        <ListOrdered className="h-4 w-4" />
+                        <span>Centraliteitswaarden</span>
+                      </Button>
+                    </SheetTrigger>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Bekijk exacte centraliteitswaarden</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+              <SheetContent side="bottom" className="h-[75vh] flex flex-col p-0">
+                <ThreatTable nodes={nodes} />
+              </SheetContent>
+            </Sheet>
+          </div>
+
+          {/* Tutorial Button */}
+          <div className="bg-background/70 backdrop-blur-md p-2 rounded-lg shadow-lg">
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <SheetTrigger asChild>
-                    <Button variant="outline" size="sm" className="gap-1 px-3" disabled={loading || !!error || nodes.length === 0}>
-                      <ListOrdered className="h-4 w-4" />
-                      <span>Centraliteitswaarden</span>
-                    </Button>
-                  </SheetTrigger>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="gap-1 px-3"
+                    onClick={startTutorial}
+                    disabled={loading || !!error || nodes.length === 0}
+                  >
+                    <HelpCircle className="h-4 w-4" />
+                    <span>Gids</span>
+                  </Button>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>Bekijk exacte centraliteitswaarden</p>
+                  <p>Start interactieve gids</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
-            <SheetContent side="bottom" className="h-[75vh] flex flex-col p-0">
-              <ThreatTable nodes={nodes} />
-            </SheetContent>
-          </Sheet>
+          </div>
         </div>
-
-        {/* Tutorial Button */}
-        <div className="bg-background/70 backdrop-blur-md p-2 rounded-lg shadow-lg">
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="gap-1 px-3"
-                  onClick={startTutorial}
-                  disabled={loading || !!error || nodes.length === 0}
-                >
-                  <HelpCircle className="h-4 w-4" />
-                  <span>Gids</span>
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Start interactieve gids</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        </div>
-      </div>
+      )}
 
        {edgeWeightCutoff > 0.5 && (
          <div className="absolute top-16 left-1/2 transform -translate-x-1/2 z-10">
